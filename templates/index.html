@@ -13,13 +13,11 @@
     <title>splunk> blaze</title>
 </head>
 <body style="text-align:center;">
-
     <img src="{{ static_url("img/logo2.png") }}" style="padding-bottom:20px; padding-top:20px;"/>
     <form action="/search" method="post">
       {{ xsrf_form_html() }}
       <input type="text" name="s" value="Enter a search...." style="font-family:Consolas,Monaco,Courier New,monospace; color:#333333; border-style:solid; border-width:1px; font-size:14px; width:80%; padding:4px;"/>
     </form>
-    <script type="text/javascript">document.forms[0].elements['s'].focus();</script>
-
+    <script type="text/javascript">with(document.forms[0].elements['s']){focus(); select();}</script>
 </body>
 </html>
