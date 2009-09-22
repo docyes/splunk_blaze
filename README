@@ -9,3 +9,7 @@ Tornado:
 http://www.tornadoweb.org/
 Splunk:
 http://www.splunk.com/download
+Splunk Python SDK:
+http://code.google.com/p/splunk-python-sdk/
+Run:
+python splunkblaze.py
