@@ -1,0 +1,25 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html;" />
+    <meta http-equiv="content-language" content="en-US" />
+    <meta http-equiv="imagetoolbar" content="no" />
+    <meta name="rating" content="General" />
+    <meta name="author" content="Dr. Yes, spam at featureblend.com" />
+    <meta name="robots" content="index,follow" />
+    <meta name="revisit-after" content="10 days" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <title>splunk> blaze</title>
+</head>
+<body style="text-align:center;">
+
+    <img src="{{ static_url("img/logo2.png") }}" style="padding-bottom:20px; padding-top:20px;"/>
+    <form action="/search" method="post">
+      {{ xsrf_form_html() }}
+      <input type="text" name="s" value="Enter a search...." style="font-family:Consolas,Monaco,Courier New,monospace; color:#333333; border-style:solid; border-width:1px; font-size:14px; width:80%; padding:4px;"/>
+    </form>
+    <script type="text/javascript">document.forms[0].elements['s'].focus();</script>
+
+</body>
+</html>
