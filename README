@@ -1,5 +1,5 @@
 splunk> blaze
-A blazingly fast frontend based using the http://www.tornadoweb.org web framework and http://www.splunk.com search engine.
+A blazingly fast frontend using the http://www.tornadoweb.org web framework and http://www.splunk.com search engine.
 
 Put this in your pipe and smoke it!
 
