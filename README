@@ -1,5 +1,5 @@
 splunk> blaze
-A blazingly fast frontend using the http://www.tornadoweb.org web framework and http://www.splunk.com search engine.
+A blazingly fast frontend with key bindings using the http://www.tornadoweb.org web framework and http://www.splunk.com search engine.
 
 Put this in your pipe and smoke it!
 
@@ -14,3 +14,6 @@ Run:
 python splunkblaze.py
 Surf:
 http://localhost:8888
+
+Know Issues:
+-Safari key bindings not working.
