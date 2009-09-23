@@ -1,19 +1,29 @@
 splunk> blaze
-A blazingly fast frontend with key bindings using the http://www.tornadoweb.org web framework and http://www.splunk.com search engine.
+=======
+A blazingly fast frontend with arrow key bindings using the Facebook http://www.tornadoweb.org web framework and http://www.splunk.com search engine.
 
 Put this in your pipe and smoke it!
 
-Installation:
-Tornado:
+Installation
+=======
+Install Tornado:
 http://www.tornadoweb.org/
-Splunk:
-http://www.splunk.com/download
-Splunk Python SDK:
-http://code.google.com/p/splunk-python-sdk/
-Run:
-python splunkblaze.py
-Surf:
-http://localhost:8888
 
-Know Issues:
+Install Splunk:
+http://www.splunk.com/download
+
+Install Splunk Python SDK (Optional)
+This is not necessary if you are running this on the same machine as splunk.
+http://code.google.com/p/splunk-python-sdk/
+
+Run Splunk Blaze:
+#Download http://github.com/docyes/splunk_blaze/tarball/master 
+tar zvzf docyes-splunk-blaze-*.tar.gz
+cd docyes-splunk-blaze-*
+#edit splunkblaze.py with the appropriate splunkd machine
+python splunkblaze.py
+#surf and don't forget to use your arrow keys to navigate! http://localhost:8888
+
+Know Issues
+=======
 -Safari key bindings not working.
