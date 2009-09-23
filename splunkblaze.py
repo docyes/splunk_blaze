@@ -1,24 +1,56 @@
-import tornado.httpserver
-import tornado.ioloop
-import tornado.web
-import uimodules
+#!/usr/bin/env python
+
 import os.path
 import time
 import splunk.auth
 import splunk.search
+import tornado.httpserver
+import tornado.ioloop
+import tornado.options
+import tornado.web
+import uimodules
 
-class MainHandler(tornado.web.RequestHandler):
+from tornado.options import define, options
+
+define("port", default=8888, help="run web server on the given port", type=int)
+define("splunk_host_path", default="https://localhost:8089", help="splunk server scheme://host:port (Use http over https for performance bump!)")
+define("splunk_username", default="admin", help="splunk user")
+define("splunk_password", default="changeme", help="splunk password")
+
+class Application(tornado.web.Application):
+    def __init__(self):
+        handlers = [
+            (r"/", HomeHandler),
+            (r"/search", SearchHandler),            
+        ]
+        settings = dict(
+            template_path=os.path.join(os.path.dirname(__file__), "templates"),
+            static_path=os.path.join(os.path.dirname(__file__), "static"),
+            cookie_secret="e220cf903f537500f6cfcaccd64df14d",
+            xsrf_cookies=True,
+            ui_modules=uimodules,            
+        )
+        tornado.web.Application.__init__(self, handlers, **settings)
+        
+        #Have one global splunk session_key accross all users.
+        self.session_key = splunk.auth.getSessionKey(options.splunk_username, options.splunk_password, hostPath=options.splunk_host_path)
+        
+class BaseHandler(tornado.web.RequestHandler):
+    @property
+    def session_key(self):
+        return self.application.session_key
+    
+class HomeHandler(BaseHandler):
     def get(self):
-        self.render("templates/index.html")
+        self.render("index.html")
 
-class SearchHandler(tornado.web.RequestHandler):
+class SearchHandler(BaseHandler):
     def post(self):
-        session_key = splunk.auth.getSessionKey("admin", "changeme", hostPath="http://localhost:8089")
-        job = splunk.search.dispatch(self.get_argument("search"), sessionKey=session_key, hostPath="http://localhost:8089")
+        job = splunk.search.dispatch(self.get_argument("search"), sessionKey=self.session_key, hostPath=options.splunk_host_path)
         job.setFetchOption(
             segmentationMode='full',
             maxLines=500,
-        )        
+        )
         maxtime = 1
         pause = 0.05
         lapsed = 0.0
@@ -51,23 +83,14 @@ class SearchHandler(tornado.web.RequestHandler):
             </xsl:template>
         </xsl:stylesheet>
         '''
-        self.render("templates/search.html", job=job, xslt=xslt)
+        self.render("search.html", job=job, xslt=xslt)
 
-settings = {
-    "static_path": os.path.join(os.path.dirname(__file__), "static"),
-    "cookie_secret": "e220cf903f537500f6cfcaccd64df14d",
-    "xsrf_cookies": True,
-    "debug": True,
-    "ui_modules": uimodules,
-}
-
-application = tornado.web.Application([
-    (r"/", MainHandler),
-    (r"/search", SearchHandler),
-], **settings)
-
-if __name__ == "__main__":
-    http_server = tornado.httpserver.HTTPServer(application)
-    http_server.listen(8888)
+def main():
+    tornado.options.parse_command_line()
+    http_server = tornado.httpserver.HTTPServer(Application())
+    http_server.listen(options.port)
     tornado.ioloop.IOLoop.instance().start()
-    
+ 
+ 
+if __name__ == "__main__":
+    main()

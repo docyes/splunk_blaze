@@ -20,10 +20,17 @@ Run Splunk Blaze:
 #Download http://github.com/docyes/splunk_blaze/tarball/master 
 tar zvzf docyes-splunk-blaze-*.tar.gz
 cd docyes-splunk-blaze-*
-#edit splunkblaze.py with the appropriate splunkd machine
-python splunkblaze.py
-#surf and don't forget to use your arrow keys to navigate! http://localhost:8888
+#Make splunkblaze.py executable.
+chmod u+x splunkblaze.py
+#Checkout the nifty command line options.
+#Command line formats are what you would expect ("--myoption=myvalue")
+./splunkblaze.py --help
+#Blaze! (Default port is 8888)
+./splunkblaze.py
 
-Know Issues
+Know Issues:
 =======
 -Safari key bindings not working.
+
+Future Features:
+-Faster!
