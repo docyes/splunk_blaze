@@ -2,7 +2,7 @@ splunk> blaze
 
 A http://www.tornadoweb.org web application using the http://www.splunk.com search engine.
 
-Put that in your pipe and smoke it!
+Put this in your pipe and smoke it!
 
 Installation:
 Tornado:
