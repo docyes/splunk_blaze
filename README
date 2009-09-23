@@ -1,6 +1,5 @@
 splunk> blaze
-
-A http://www.tornadoweb.org web application using the http://www.splunk.com search engine.
+A blazingly fast frontend based using the http://www.tornadoweb.org web framework and http://www.splunk.com search engine.
 
 Put this in your pipe and smoke it!
 
@@ -13,3 +12,5 @@ Splunk Python SDK:
 http://code.google.com/p/splunk-python-sdk/
 Run:
 python splunkblaze.py
+Surf:
+http://localhost:8888
