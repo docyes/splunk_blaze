@@ -11,13 +11,383 @@
     <meta name="description" content="" />
     <meta name="keywords" content="" />
     <title>splunk> blaze</title>
+    <style type="text/css">
+    body, div, input, select, textarea, label {
+      font-family:Consolas, Monaco, Courier New, monospace;
+      font-size:12px;
+      color:#333;
+    }
+    body, div, form {
+      margin:0px;
+      padding:0px;
+    }
+    body {
+      background-color:#FFF;    
+    }
+    h1, h2, h3, h4, h5, h6 {
+      display:inline;
+      margin:0px;
+      padding:0px;
+      font-weight:normal;
+    }
+    img {
+      border:0px;
+    }
+    td {
+      vertical-align:top;   
+    }
+    th {
+      font-weight:normal;   
+    }
+    em {
+      font-style:normal;    
+    }
+    ul, ol {
+      margin:0px;
+      padding:0px;
+      list-style:none;
+    }
+   /* BEGIN: default event decorator styles */
+    .events {
+        padding:0px 12px 12px 12px;
+        text-align:left;
+    }
+    .events .default {
+        zoom:1;
+        display:block;
+        margin-bottom:0px;
+        padding:8px 0px 8px 0px;
+        border-bottom:1px dotted #EEDDDD;  
+    }
+    .events .default:hover {
+        /* nothing */
+    }
+    .events .default td {
+        text-align:left;
+    }
+    .events .default .col1 {
+        padding-right:8px;
+        min-width:18px;
+        vertical-align:top; 
+    }
+    .events .default .col2 {
+        padding-top:2px;
+        padding-right:8px;
+        padding-left:22px;
+        vertical-align:top;    
+    }
+    .events .default .col3 {
+        padding-top:2px;
+        vertical-align:top;
+    }
+    .events .default .t, .events .default .fields .v, .events .default .fields .tg, .events .default .time {
+        font-style:normal;
+    }
+    .events .default .time {
+        color:#666;
+    }
+    .events .default .time, .events .default .event {
+        font-family:Consolas, Monaco, Courier New, monospace;
+        font-size:12px;
+    }
+    .events .default .event {
+        margin:0px 0px 0px 0px;
+        zoom:1;
+        color:#333;
+    }
+    .events .default .event {
+        word-wrap:break-word; /* IE 5.5-7 */
+        white-space:-moz-pre-wrap; /* Firefox 1.0-2.0 */
+        white-space:pre-wrap; /* current browsers */
+        ?white-space:normal;
+    }
+    .events .default .fields {
+        margin:0px;
+        padding:0px;
+        list-style:none;
+    }
+    .events .default .fields li {
+        padding:0px;
+        margin:0px;
+        display:inline;
+    }
+    .events .default .fields .fm {
+        text-decoration:none;
+        text-indent:-5000px;
+        width:13px;
+        height:12px;
+        /* BEGIN: FF2 inline block text-indent fixes. (negative text-indent only works on block level elements) */
+        display:-moz-inline-box;
+        overflow:hidden;
+        font-size:1px;
+        vertical-align:text-top;
+        /* END: FF2 inline block text-indent fixes. */
+        vertical-align:middle;
+        display:inline-block;
+    }
+    .events .default .actions {
+        padding:3px;
+        opacity:.8;
+    }
+    .events .default:hover .actions {
+        opacity:1;
+    }
+    .EventsViewerLoading {
+        opacity:.5;
+    }
+    .events .default .a, .events .default .h, .events .default .fields .v:hover, .events .default .fields .tg:hover {
+        background-color:#ffa401;
+    }
+    /* END: default event decorator styles */     
+    </style>
 </head>
-<body style="text-align:center;">
-    <img src="{{ static_url("img/logo2.png") }}" style="padding-bottom:20px; padding-top:20px;"/>
-    <form action="/search" method="post">
+<body style="text-align:center; padding-top:30px;">
+    <form action="/search" method="post" onsubmit="return false;">
       {{ xsrf_form_html() }}
-      <input type="text" name="s" value="Enter a search...." style="font-family:Consolas,Monaco,Courier New,monospace; color:#333333; border-style:solid; border-width:1px; font-size:14px; width:80%; padding:4px;"/>
+      <input type="text" name="s" value="Put this in your pipe and smoke it!" style="font-family:Consolas,Monaco,Courier New,monospace; color:#333333; border-style:solid; border-width:1px; font-size:14px; width:80%; padding:4px;" autocomplete="off" class="s" />
     </form>
-    <script type="text/javascript">with(document.forms[0].elements['s']){focus(); select();}</script>
+    <div id="r"></div>
+    <script type="text/javascript">
+    (   
+        function(){
+            //libsr4kids
+            var xhr = null;
+            var d = document;
+            var inp = document.forms[0].elements['s'];
+            with(inp){
+                focus();
+                select();
+            }
+            if(typeof(XMLHttpRequest)==="undefined"){
+                XMLHttpRequest = function() {
+                    try{return new ActiveXObject("Msxml2.XMLHTTP.6.0");}catch(e){}
+                    try{return new ActiveXObject("Msxml2.XMLHTTP.3.0");}catch(e){}
+                    try{return new ActiveXObject("Msxml2.XMLHTTP");}catch(e){}
+                    try{return new ActiveXObject("Microsoft.XMLHTTP");}catch(e){}
+                    throw new Error("This browser does not support XMLHttpRequest.");
+                };
+            }
+            function xsrfExtract() {
+                var name = "_xsrf";
+                var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+                return r ? r[1] : undefined;
+            }
+            var xsrf = xsrfExtract();
+            function evt(obj, event, callback, scope){
+                if(window.addEventListener){
+                   obj.addEventListener(
+                        event, 
+                        function(evt){
+                           callback(evt, evt.target);
+                        },
+                       false
+                   );
+               }else if(window.attachEvent){
+                    obj.attachEvent(
+                        "on"+event,
+                        function(){
+                            callback(window.event, window.event.srcElement);
+                        }
+                    );
+                }
+            }
+            var buffy = null;
+            function buffyXHRSlayer(evt, target){
+                var charCode = (evt.which)?evt.which:evt.keyCode;
+                if(charCode>=37 && charCode<=40){
+                    return;
+                }else{
+                    if(buffy){
+                        clearTimeout(buffy);
+                    }
+                    buffy = setTimeout(s, 150);
+                }
+            }
+            function s(){
+                if(buffy){
+                    if(xhr){
+                        xhr.onreadystatechange = function(){};
+                        xhr.abort();
+                        xhr = null;
+                    }
+                    xhr = new XMLHttpRequest();
+                    var body = "_xsrf="+encodeURIComponent(xsrf)+"&search="+encodeURIComponent("search ")+encodeURIComponent(inp.value)+encodeURIComponent("| head 10")
+                    xhr.open("POST", "/search", true);
+                    xhr.onreadystatechange = function(){
+                        if(xhr.readyState===4){
+                            d.getElementById("r").innerHTML = (xhr.status==200)?xhr.responseText:'&nbsp;';
+                            var items = getEvents();
+                            if(items.length>0){
+                                selectEvent(items[0]);
+                            }
+                        }
+                    }
+                    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    xhr.send(body);
+                }
+            }
+            function selectEvent(el){
+                el.active = true;
+                el.style.background = "url({{ static_url("img/arrow.png") }}) no-repeat 0px 7px";
+            }
+            function getEvents(){
+                return document.getElementById("r").getElementsByTagName("li");
+            }
+            function getTerms(parent){
+                return parent.getElementsByTagName("em");
+            }
+            function resetTerms(parent){
+                var terms = getTerms(parent);
+                for(var i=0; i<terms.length; i++){
+                    if(terms[i].active){
+                        terms[i].active = false;
+                        removeClass(terms[i], "h");
+                        break;
+                    }
+                }                
+            }
+            function getCharCode(evt){
+                return (evt.which)?evt.which:evt.keyCode;
+            }
+            function navigator(evt, target){
+                var charCode = getCharCode(evt);
+                if(charCode==38 || charCode==40){
+                    var items = getEvents();
+                    if(items.length==0){
+                        return;
+                    }
+                    var activeIndex = -1;
+                    for(var i=0; i<items.length; i++){
+                        if(items[i].active){
+                            items[i].active = false;
+                            items[i].style.background = "";
+                            activeIndex  = i;
+                            break;
+                        }
+                    }
+                    if(activeIndex>-1){
+                        resetTerms(items[activeIndex]);
+                    }
+                    if(charCode==38){
+                        //up
+                        if(activeIndex==-1){
+                            var el = items[items.length-1];
+                        }else if(activeIndex>0){
+                            var el = items[activeIndex-1];
+                        }else{
+                            var el = items[items.length-1];
+                        }
+                        selectEvent(el);
+                    }else if(charCode==40){
+                        //down
+                        if(activeIndex==-1){
+                            var el = items[0];
+                        }else if(activeIndex<items.length-1){
+                            var el = items[activeIndex+1];
+                        }else{
+                            var el = items[0];
+                        }
+                        selectEvent(el);
+                    }
+                    
+                }
+                if(charCode==37 || charCode==39){
+                    var items = getEvents();
+                    if(items.length==0){
+                        return;
+                    }
+                    var activeIndex = -1;
+                    for(var i=0; i<items.length; i++){
+                        if(items[i].active){
+                            activeIndex  = i;
+                            break;
+                        }
+                    }
+                    if(activeIndex==-1){
+                        return;
+                    }
+                    var terms = getTerms(items[activeIndex]);
+                    var activeTermIndex = -1;
+                    for(var i=0; i<terms.length; i++){
+                        if(terms[i].active){
+                            terms[i].active = false;
+                            removeClass(terms[i], "h");
+                            activeTermIndex  = i;
+                            break;
+                        }
+                    }
+                    if(charCode==37){
+                        //left
+                        if(activeTermIndex==-1){
+                            var el = terms[terms.length-1];
+                        }else if(activeTermIndex>0){
+                            var el = terms[activeTermIndex-1];
+                        }else{
+                            var el = terms[terms.length-1];
+                        }
+                        addClass(el, "h");
+                        el.active = true;                        
+                    }else if(charCode==39){
+                        //right 
+                        if(activeTermIndex==-1){
+                            var el = terms[0];
+                        }else if(activeTermIndex<terms.length-1){
+                            var el = terms[activeTermIndex+1];
+                        }else{
+                            var el = terms[0];
+                        }
+                        addClass(el, "h");
+                        el.active = true;
+                    }
+                }
+            }
+            function hasClass(el, cl) {
+                return el.className.match(new RegExp('(\\s|^)'+cl+'(\\s|$)'));
+            }
+            function addClass(el ,cl) {
+                if(!hasClass(el, cl)) el.className += " "+ cl;
+            }
+            function removeClass(el, cl) {
+                if(hasClass(el, cl)){
+                    var reg = new RegExp('(\\s|^)'+cl+'(\\s|$)');
+                    el.className = el.className.replace(reg,' ');
+                }
+            }
+            function cupkie(evt, target){
+                var charCode = getCharCode(evt);
+                if(charCode==13){
+                    var items = getEvents();
+                    var activeIndex = -1;
+                    for(var i=0; i<items.length; i++){
+                        if(items[i].active){
+                            activeIndex  = i;
+                            break;
+                        }
+                    }
+                    if(activeIndex==-1){
+                        return;
+                    }
+                    var terms = getTerms(items[activeIndex]);
+                    var activeTermIndex = -1;
+                    for(var i=0; i<terms.length; i++){
+                        if(terms[i].active){
+                            activeTermIndex  = i;
+                            break;
+                        }
+                    }
+                    if(activeTermIndex==-1){
+                        return;
+                    }
+                    var str = (terms[activeTermIndex].textContent)?terms[activeTermIndex].textContent:terms[activeTermIndex].innerText;
+                    inp.value = inp.value + " " + str;
+                    s();                                            
+                }
+            }
+            et = evt(inp, 'keydown', buffyXHRSlayer);
+            phonehome = evt(document, 'keypress', navigator);
+            elliot = evt(document, 'keyup', cupkie);
+        }
+    )();
+    </script>
 </body>
 </html>
