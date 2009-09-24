@@ -12,7 +12,7 @@ import uimodules
 
 from tornado.options import define, options
 
-define("port", default=8888, help="run web server on the given port", type=int)
+define("port", default=8888, help="web server port", type=int)
 define("splunk_host_path", default="https://localhost:8089", help="splunk server scheme://host:port (Use http over https for performance bump!)")
 define("splunk_username", default="admin", help="splunk user")
 define("splunk_password", default="changeme", help="splunk password")
