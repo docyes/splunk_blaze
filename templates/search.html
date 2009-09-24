@@ -1,12 +1,18 @@
 {% if len(job.events[:])>0 %}
-    <div style="text-align:right; margin:24px;">
-        <h2 style="color:#333; font-weight:normal; font-size:12px;">Results <em style="font-weight:bold;">1</em> - <em style="font-weight:bold;">{{ len(job.events[:]) }}</em> of 
-        {% if len(job.events[:])<10 %}
-            <em style="font-weight:bold;">{{ len(job.events[:]) }}</em> 
-        {% else %}
-            <em style="font-weight:bold;">many</em> 
-        {% end %}        
-        for <em style="font-weight:bold;">{{ job.search }}</em>. (<em style="font-weight:bold;">{{ job.runDuration }}</em> seconds)</h2>
+    <div style="margin:24px;">
+        <div style="float:left; text-align:left; width:40%;">
+            <em style="border:1px solid #3f3f3f; font-family:serif; padding:2px;">&#8592;</em> <em style="border:1px solid #3f3f3f; font-family:serif; padding:2px;">&#8593;</em> <em style="border:1px solid #3f3f3f; font-family:serif; padding:2px;">&#8595;</em> <em style="border:1px solid #3f3f3f; padding:2px; font-family:serif;">&#8594;</em> <em style="border:1px solid #3f3f3f; padding:3px;">Enter</em> adds items to your search.
+        </div>
+        <div style="float:left; text-align:right; width:60%;">
+            <h2 style="color:#333; font-weight:normal; font-size:12px;">Results <em style="font-weight:bold;">1</em> - <em style="font-weight:bold;">{{ len(job.events[:]) }}</em> of 
+            {% if len(job.events[:])<10 %}
+                <em style="font-weight:bold;">{{ len(job.events[:]) }}</em> 
+            {% else %}
+                <em style="font-weight:bold;">many</em> 
+            {% end %}        
+            for <em style="font-weight:bold;">{{ job.search }}</em>. (<em style="font-weight:bold;">{{ job.runDuration }}</em> seconds)</h2>
+        </div>
+        <div style="clear:both;"></div>        
     </div>
     <div class="events">
         <ul class="events">

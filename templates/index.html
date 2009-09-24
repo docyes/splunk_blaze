@@ -10,7 +10,7 @@
     <meta name="revisit-after" content="10 days" />
     <meta name="description" content="" />
     <meta name="keywords" content="" />
-    <title>splunk> blaze</title>
+    <title>blaze&gt;</title>
     <style type="text/css">
     body, div, input, select, textarea, label {
       font-family:Consolas, Monaco, Courier New, monospace;
@@ -135,13 +135,18 @@
     .EventsViewerLoading {
         opacity:.5;
     }
-    .events .default .a, .events .default .h, .events .default .fields .v:hover, .events .default .fields .tg:hover {
-        background-color:#ffa401;
+    .events .default .a, .events .default .fields .v:hover, .events .default .fields .tg:hover {
+        background-color:#3f3f3f;
+        color:#fff;        
+    }
+    .events .default .h {
+        background-color:#F5E998;
+        color:#333;
     }
     /* END: default event decorator styles */     
     </style>
 </head>
-<body style="text-align:center; padding-top:30px;">
+<body style="text-align:center; padding-top:127px; background:url({{ static_url("img/smoke.png") }}) no-repeat 0px 0px;">
     <form action="/search" method="post" onsubmit="return false;">
       {{ xsrf_form_html() }}
       <input type="text" name="s" value="Put this in your pipe and smoke it!" style="font-family:Consolas,Monaco,Courier New,monospace; color:#333333; border-style:solid; border-width:1px; border-color:#CCC; font-size:14px; width:80%; padding:4px;" autocomplete="off" class="s" />
@@ -211,7 +216,7 @@
                         xhr = null;
                     }
                     xhr = new XMLHttpRequest();
-                    var body = "_xsrf="+encodeURIComponent(xsrf)+"&search="+encodeURIComponent("search ")+encodeURIComponent(inp.value)+encodeURIComponent("| head 10")
+                    var body = "_xsrf="+encodeURIComponent(xsrf)+"&search="+encodeURIComponent("search index=_* ")+encodeURIComponent(inp.value)+encodeURIComponent("* | head 10")
                     xhr.open("POST", "/search", true);
                     xhr.onreadystatechange = function(){
                         if(xhr.readyState===4){
