@@ -196,6 +196,24 @@
                     );
                 }
             }
+            function Selection(){
+                var self = this;
+                self.obj;
+                self.getRangeAt = function(index){
+                    if(self.obj.getRangeAt){
+                        return self.obj.getRangeAt(index);
+                    }else{
+                        return false;
+                    }
+                }
+                self.Selection = function(){
+                    if(window.getSelection){
+                        self.obj = window.getSelection();
+                    }else if(document.selection){
+                        self.obj = document.selection.createRange();
+                    }
+                }();
+            }            
             var buffy = null;
             function buffyXHRSlayer(evt, target){
                 var charCode = (evt.which)?evt.which:evt.keyCode;
@@ -361,6 +379,16 @@
             function cupkie(evt, target){
                 var charCode = getCharCode(evt);
                 if(charCode==13){
+                    var str = "";
+                    var selectObj = new Selection();
+                    try{
+                        var str = selectObj.getRangeAt(0).toString();
+                    }catch(err){}
+                    if(str.length>0){
+                        inp.value = inp.value + " *" + str + "*";
+                        s();
+                        return;
+                    }
                     var items = getEvents();
                     var activeIndex = -1;
                     for(var i=0; i<items.length; i++){
@@ -387,10 +415,11 @@
                     inp.value = inp.value + " " + str;
                     s();                                            
                 }
-            }
+            }          
             et = evt(inp, 'keydown', buffyXHRSlayer);
             phonehome = evt(document, 'keypress', navigator);
             elliot = evt(document, 'keyup', cupkie);
+            //speakspell = evt(d.getElementById("r"), 'mousemove', rangeObserver);
         }
     )();
     </script>
