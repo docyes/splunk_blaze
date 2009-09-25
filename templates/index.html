@@ -159,6 +159,7 @@
             var xhr = null;
             var d = document;
             var inp = document.forms[0].elements['s'];
+            var mrcache = 0;
             with(inp){
                 focus();
                 select();
@@ -213,42 +214,50 @@
                         self.obj = document.selection.createRange();
                     }
                 }();
-            }            
-            var buffy = null;
-            function buffyXHRSlayer(evt, target){
-                var charCode = (evt.which)?evt.which:evt.keyCode;
-                if(charCode>=37 && charCode<=40){
-                    return;
-                }else{
-                    if(buffy){
-                        clearTimeout(buffy);
-                    }
-                    buffy = setTimeout(s, 150);
-                }
             }
-            function s(){
-                if(buffy){
-                    if(xhr){
-                        xhr.onreadystatechange = function(){};
-                        xhr.abort();
-                        xhr = null;
-                    }
-                    xhr = new XMLHttpRequest();
-                    var body = "_xsrf="+encodeURIComponent(xsrf)+"&search="+encodeURIComponent("search index=_* ")+encodeURIComponent(inp.value)+encodeURIComponent("* | head 10")
-                    xhr.open("POST", "/search", true);
-                    xhr.onreadystatechange = function(){
-                        if(xhr.readyState===4){
-                            d.getElementById("r").innerHTML = (xhr.status==200)?xhr.responseText:'&nbsp;';
-                            var items = getEvents();
-                            if(items.length>0){
-                                selectEvent(items[0]);
-                            }
-                        }
-                    }
-                    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                    xhr.send(body);
-                }
-            }
+			var searchQueue = false;
+			function s(){
+			    if(xhr){
+			        //console.log('xhr in progress enable search queue')
+			        searchQueue = true;
+			        return;
+			    }
+			    xhr = new XMLHttpRequest();
+			    var searchStr = "search="+encodeURIComponent("search index=_* ")+encodeURIComponent(inp.value)+encodeURIComponent("* | head 10")
+			    var body = "_xsrf="+encodeURIComponent(xsrf)+"&"+searchStr;
+			    xhr.open("POST", "/search", true);
+			    var xhrTimeout = setTimeout(function(){
+			        //console.log('xhr timeout')
+			        xhr.onreadystatechange = function(){};
+			        xhr.abort();
+			        xhr = null;
+			        if(searchQueue){
+			            searchQueue = false;
+			            s();
+			        }
+			    }, 2000);
+			    xhr.onreadystatechange = function(){
+			        if(xhr.readyState===4){
+			            clearTimeout(xhrTimeout);
+			            if(xhr.status==200){
+			                d.getElementById("r").innerHTML = xhr.responseText;
+			                var items = getEvents();
+			                if(items.length>0){
+			                    selectEvent(items[0]);
+			                }                
+			            }else{
+			                d.getElementById("r").innerHTML = "&nbsp;";
+			            }
+			            xhr = null;
+			            if(searchQueue){
+			                searchQueue = false;
+			                s();
+			            }            
+			        }
+			    }
+			    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			    xhr.send(body);
+			}
             function selectEvent(el){
                 el.active = true;
                 el.style.background = "url({{ static_url("img/arrow.png") }}) no-repeat 0px 7px";
@@ -272,7 +281,7 @@
             function getCharCode(evt){
                 return (evt.which)?evt.which:evt.keyCode;
             }
-            function navigator(evt, target){
+            function nav(evt, target){
                 var charCode = getCharCode(evt);
                 if(charCode==38 || charCode==40){
                     var items = getEvents();
@@ -415,10 +424,15 @@
                     inp.value = inp.value + " " + str;
                     s();                                            
                 }
+                if(charCode<37 || charCode>40){
+                    s();
+                }
             }          
-            et = evt(inp, 'keydown', buffyXHRSlayer);
-            phonehome = evt(document, 'keypress', navigator);
-            elliot = evt(document, 'keyup', cupkie);
+            //et = evt(inp, 'keydown', buffyXHRSlayer);
+            //"keydown for safari"
+            navEventType = (navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1)?"keydown":"keypress";
+            phonehome = evt(document, navEventType, nav);
+            elliot = evt(document, "keyup", cupkie);
             //speakspell = evt(d.getElementById("r"), 'mousemove', rangeObserver);
         }
     )();
