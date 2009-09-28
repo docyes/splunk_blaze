@@ -12,7 +12,7 @@ http://www.tornadoweb.org/
 Install Splunk:
 http://www.splunk.com/download
 
-Install Splunk Python SDK (Optional)
+Install lxml Pythonic binding for the libxml2 and libxslt libraries (Optional)
 This is not necessary if you are running this on the same machine as splunk.
 http://code.google.com/p/splunk-python-sdk/
 

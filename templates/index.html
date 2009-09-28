@@ -214,7 +214,7 @@
                         self.obj = document.selection.createRange();
                     }
                 }();
-            }
+            }           
 			var searchQueue = false;
 			function s(){
 			    if(xhr){
@@ -223,9 +223,10 @@
 			        return;
 			    }
 			    xhr = new XMLHttpRequest();
-			    var searchStr = "search="+encodeURIComponent("search index=_* ")+encodeURIComponent(inp.value)+encodeURIComponent("* | head 10")
-			    var body = "_xsrf="+encodeURIComponent(xsrf)+"&"+searchStr;
-			    xhr.open("POST", "/search", true);
+	            var searchStr = "search="+encodeURIComponent({{json_encode(splunk_search_query_prefix) }})+encodeURIComponent(inp.value)+encodeURIComponent({{json_encode(splunk_search_query_suffix) }})
+			    //var body = "_xsrf="+encodeURIComponent(xsrf)+"&"+searchStr;
+			    //xhr.open("POST", "/search", true);
+			    xhr.open("GET", "/search?"+searchStr, true);
 			    var xhrTimeout = setTimeout(function(){
 			        //console.log('xhr timeout')
 			        xhr.onreadystatechange = function(){};
@@ -241,10 +242,12 @@
 			            clearTimeout(xhrTimeout);
 			            if(xhr.status==200){
 			                d.getElementById("r").innerHTML = xhr.responseText;
+			                //window.location.hash = searchStr
 			                var items = getEvents();
 			                if(items.length>0){
 			                    selectEvent(items[0]);
-			                }                
+			                }
+			                              
 			            }else{
 			                d.getElementById("r").innerHTML = "&nbsp;";
 			            }
@@ -256,7 +259,8 @@
 			        }
 			    }
 			    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			    xhr.send(body);
+			    xhr.send();
+			    //xhr.send(body);
 			}
             function selectEvent(el){
                 el.active = true;
@@ -394,7 +398,7 @@
                         var str = selectObj.getRangeAt(0).toString();
                     }catch(err){}
                     if(str.length>0){
-                        inp.value = inp.value + " *" + str + "*";
+                        inp.value = inp.value + " \"*" + str + "*\"";
                         s();
                         return;
                     }
@@ -421,19 +425,17 @@
                         return;
                     }
                     var str = (terms[activeTermIndex].textContent)?terms[activeTermIndex].textContent:terms[activeTermIndex].innerText;
-                    inp.value = inp.value + " " + str;
+                    inp.value = inp.value + " \"" + str + "\"";
                     s();                                            
                 }
                 if(charCode<37 || charCode>40){
                     s();
                 }
-            }          
-            //et = evt(inp, 'keydown', buffyXHRSlayer);
+            }                      
             //"keydown for safari"
             navEventType = (navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1)?"keydown":"keypress";
             phonehome = evt(document, navEventType, nav);
             elliot = evt(document, "keyup", cupkie);
-            //speakspell = evt(d.getElementById("r"), 'mousemove', rangeObserver);
         }
     )();
     </script>

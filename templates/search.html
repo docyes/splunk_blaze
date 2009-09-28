@@ -1,33 +1,30 @@
-{% if len(job.events[:])>0 %}
-    <div style="margin:24px;">
-        <div style="float:left; text-align:left; width:40%;">
-            (&nbsp;<em style="border:1px solid #3f3f3f; font-family:serif;">&#8592;</em> <em style="border:1px solid #3f3f3f; font-family:serif;">&#8593;</em> <em style="border:1px solid #3f3f3f; font-family:serif;">&#8595;</em> <em style="border:1px solid #3f3f3f; font-family:serif;">&#8594;</em> <em style="text-decoration:underline;">OR</em> sele<em style="padding-top:2px; background:#B3D9FF;">ct te</em>xt&nbsp;) + <em style="border:1px solid #3f3f3f; padding:2px 2px 0px 2px;">enter</em> = search
-        </div>
-        <div style="float:left; text-align:right; width:60%;">
-            <h2 style="color:#333; font-weight:normal; font-size:12px;">Results <em style="font-weight:bold;">1</em> - <em style="font-weight:bold;">{{ len(job.events[:]) }}</em> of 
-            {% if len(job.events[:])<10 %}
-                <em style="font-weight:bold;">{{ len(job.events[:]) }}</em> 
-            {% else %}
-                <em style="font-weight:bold;">many</em> 
-            {% end %}        
-            for <em style="font-weight:bold;">{{ job.search }}</em>. (<em style="font-weight:bold;">{{ job.runDuration }}</em> seconds)</h2>
-        </div>
-        <div style="clear:both;"></div>        
+<div style="margin:24px;">
+    <div style="float:left; text-align:left; width:40%;">
+        (&nbsp;<em style="border:1px solid #3f3f3f; font-family:serif;">&#8592;</em> <em style="border:1px solid #3f3f3f; font-family:serif;">&#8593;</em> <em style="border:1px solid #3f3f3f; font-family:serif;">&#8595;</em> <em style="border:1px solid #3f3f3f; font-family:serif;">&#8594;</em> <em style="text-decoration:underline;">OR</em> sele<em style="padding-top:2px; background:#B3D9FF;">ct te</em>xt&nbsp;) + <em style="border:1px solid #3f3f3f; padding:2px 2px 0px 2px;">enter</em> = search
     </div>
-    <div class="events">
-        <ul class="events">
-        {% for event in job.events %}
-            <li class="default">
-                <table cellpadding="0" cellspacing="0">
-                <tr>
-                    <td class="col2"><em class="time">{{ event.time }}</em></td>
-                    <td class="col3"><pre class="event">{{ event.raw.toXml(xslt) }}</pre></td>
-                </tr>
-                </table>
-            </li>
-        {% end %}
-        </ul>
+    <div style="float:left; text-align:right; width:60%;">
+        <h2 style="color:#333; font-weight:normal; font-size:12px;">Results <em style="font-weight:bold;">1</em> - <em style="font-weight:bold;">{{ len(xml_doc.findall("result")) }}</em> of
+        {% if len(xml_doc.findall("result"))<10 %}
+            <em style="font-weight:bold;">{{ len(xml_doc.findall("result")) }}</em> 
+        {% else %}
+            <em style="font-weight:bold;">many</em> 
+        {% end %}          
+        for <em style="font-weight:bold;">{{ search }}</em>.
+        (<em style="font-weight:bold;">{{ round(request.request_time(), 3) }}</em> seconds)</h2>
     </div>
-{% else %}
-    <!-- nada -->
-{% end %}
+    <div style="clear:both;"></div>        
+</div>
+<div class="events">
+    <ul class="events">
+    {% for result in xml_doc.findall("result") %}
+        <li class="default">
+            <table cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="col2" style="white-space: nowrap;"><em class="time">{{ result.xpath("field[@k='_time']/value/text")[0].text }}</em></td>
+                <td class="col3"><pre class="event">{{ xslt_transform(result.xpath("field[@k='_raw']/v")[0]) }}</pre></td>
+            </tr>
+            </table>
+        </li>
+    {% end %}
+    </ul>
+</div>
