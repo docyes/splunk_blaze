@@ -30,7 +30,10 @@ chmod u+x splunkblaze.py
 
 Know Issues:
 =======
--Safari key bindings not working.
+-<3.5 FF && IE Support
 
 Future Features:
+=======
 -Faster!
+-Typeahead
+-Bookmarking
