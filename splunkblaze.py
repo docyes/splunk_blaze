@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os.path
-import time
 import httplib2
 import urllib
 import io
