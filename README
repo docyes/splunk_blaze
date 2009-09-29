@@ -28,9 +28,12 @@ chmod u+x splunkblaze.py
 #Blaze! (Default port is 8888)
 ./splunkblaze.py
 
-Know Issues:
+Known Issues:
 =======
--Safari key bindings not working.
+-<3.5 FF && IE Support
 
 Future Features:
+=======
 -Faster!
+-Typeahead
+-Bookmarking
