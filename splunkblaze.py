@@ -10,12 +10,14 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.options
 import tornado.web
+import tornado.httpclient
 import uimodules
 
 from tornado.options import define, options
 
 define("port", default=8888, help="web server port", type=int)
 define("debug", default=False, help="web server debug mode", type=bool)
+define("enable_pycurl", default=True, help="use pycurl or httplib2 for http fetching", type=bool)
 define("search_browser_cache_ttl", default=30000, help="maximum browser cache lifetime for a search", type=int)
 define("splunk_host_path", default="https://localhost:8089", help="splunk server scheme://host:port (Use http over https for performance bump!)")
 define("splunk_username", default="admin", help="splunk username")
@@ -37,6 +39,7 @@ class Application(tornado.web.Application):
             cookie_secret="e220cf903f537500f6cfcaccd64df14d",
             xsrf_cookies=True,
             ui_modules=uimodules,
+            enable_pycurl=options.enable_pycurl,
             search_browser_cache_ttl=options.search_browser_cache_ttl,
             splunk_host_path=options.splunk_host_path,
             splunk_username=options.splunk_username,
@@ -61,16 +64,22 @@ class HomeHandler(BaseHandler):
 
 class SearchHandler(BaseHandler):
     def get(self):
-        h = httplib2.Http(".cache", timeout=1)
-        h.add_credentials(self.settings.get('splunk_username'), self.settings.get('splunk_password'))
         data = dict(
             search=self.get_argument("search"),
             spawn_process="1" if options.splunk_search_spawn_process else "0",
             segmentation=options.splunk_search_segmentation,
-        )
+        )        
         resource = "%s/services/search/jobs/oneshot?%s" % (self.settings.get("splunk_host_path"), urllib.urlencode(data))
-        resp, content = h.request(resource)
-        xml_doc = et.fromstring(content)
+        if self.settings.get("enable_pycurl"):
+            request = tornado.httpclient.HTTPRequest(resource, auth_username=self.settings.get('splunk_username'), auth_password=self.settings.get('splunk_password'))
+            client = tornado.httpclient.HTTPClient()
+            response = client.fetch(request)
+            body = response.body
+        else:
+            h = httplib2.Http(".cache", timeout=1)
+            h.add_credentials(self.settings.get('splunk_username'), self.settings.get('splunk_password'))
+            resp, body = h.request(resource)
+        xml_doc = et.fromstring(body)
         self.set_header("Expires", datetime.datetime.utcnow() + datetime.timedelta(days=365))         
         self.render("search.html", xml_doc=xml_doc, xslt_transform=self.application.xslt_transform, search=self.get_argument("search"))
 
