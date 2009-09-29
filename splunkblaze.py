@@ -5,6 +5,7 @@ import time
 import httplib2
 import urllib
 import io
+import datetime
 import lxml.etree as et
 import tornado.httpserver
 import tornado.ioloop
@@ -16,6 +17,7 @@ from tornado.options import define, options
 
 define("port", default=8888, help="web server port", type=int)
 define("debug", default=False, help="web server debug mode", type=bool)
+define("search_browser_cache_ttl", default=30000, help="maximum browser cache lifetime for a search", type=int)
 define("splunk_host_path", default="https://localhost:8089", help="splunk server scheme://host:port (Use http over https for performance bump!)")
 define("splunk_username", default="admin", help="splunk username")
 define("splunk_password", default="changeme", help="splunk password")
@@ -36,6 +38,7 @@ class Application(tornado.web.Application):
             cookie_secret="e220cf903f537500f6cfcaccd64df14d",
             xsrf_cookies=True,
             ui_modules=uimodules,
+            search_browser_cache_ttl=options.search_browser_cache_ttl,
             splunk_host_path=options.splunk_host_path,
             splunk_username=options.splunk_username,
             splunk_password=options.splunk_password,
@@ -55,7 +58,7 @@ class BaseHandler(tornado.web.RequestHandler):
     
 class HomeHandler(BaseHandler):
     def get(self):
-        self.render("index.html", splunk_search_query_prefix=self.settings.get("splunk_search_query_prefix"), splunk_search_query_suffix=self.settings.get("splunk_search_query_suffix"))
+        self.render("index.html", search_browser_cache_ttl=self.settings.get("search_browser_cache_ttl"), splunk_search_query_prefix=self.settings.get("splunk_search_query_prefix"), splunk_search_query_suffix=self.settings.get("splunk_search_query_suffix"))
 
 class SearchHandler(BaseHandler):
     def get(self):
@@ -69,6 +72,7 @@ class SearchHandler(BaseHandler):
         resource = "%s/services/search/jobs/oneshot?%s" % (self.settings.get("splunk_host_path"), urllib.urlencode(data))
         resp, content = h.request(resource)
         xml_doc = et.fromstring(content)
+        self.set_header("Expires", datetime.datetime.utcnow() + datetime.timedelta(days=365))         
         self.render("search.html", xml_doc=xml_doc, xslt_transform=self.application.xslt_transform, search=self.get_argument("search"))
 
 def main():

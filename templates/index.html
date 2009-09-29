@@ -159,7 +159,9 @@
             var xhr = null;
             var d = document;
             var inp = document.forms[0].elements['s'];
-            var mrcache = 0;
+            var cache;
+            updateCache();
+            setInterval(updateCache, {{ search_browser_cache_ttl }});
             with(inp){
                 focus();
                 select();
@@ -172,6 +174,10 @@
                     try{return new ActiveXObject("Microsoft.XMLHTTP");}catch(e){}
                     throw new Error("This browser does not support XMLHttpRequest.");
                 };
+            }
+            function updateCache(){
+                console.log('update cache');
+                cache = (new Date()).toString().toLowerCase().replace(/\s+/g, "-");
             }
             function xsrfExtract() {
                 var name = "_xsrf";
@@ -223,7 +229,7 @@
 			        return;
 			    }
 			    xhr = new XMLHttpRequest();
-	            var searchStr = "search="+encodeURIComponent({{json_encode(splunk_search_query_prefix) }})+encodeURIComponent(inp.value)+encodeURIComponent({{json_encode(splunk_search_query_suffix) }})
+	            var searchStr = "search="+encodeURIComponent({{json_encode(splunk_search_query_prefix) }})+encodeURIComponent(inp.value)+encodeURIComponent({{json_encode(splunk_search_query_suffix) }})+"&c="+encodeURIComponent(cache);
 			    //var body = "_xsrf="+encodeURIComponent(xsrf)+"&"+searchStr;
 			    //xhr.open("POST", "/search", true);
 			    xhr.open("GET", "/search?"+searchStr, true);
