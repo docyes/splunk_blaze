@@ -28,7 +28,7 @@ chmod u+x splunkblaze.py
 #Blaze! (Default port is 8888)
 ./splunkblaze.py
 
-Know Issues:
+Known Issues:
 =======
 -<3.5 FF && IE Support
 
