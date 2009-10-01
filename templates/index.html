@@ -155,17 +155,18 @@
     <script type="text/javascript">
     (   
         function(){
-            //libsr4kids
+            /** 
+             * libsr4kids!
+             */
             var xhr = null;
             var d = document;
-            var inp = document.forms[0].elements['s'];
+            var input = document.forms[0].elements['s'];
             var cache;
-            updateCache();
-            setInterval(updateCache, {{ search_browser_cache_ttl }});
-            with(inp){
-                focus();
-                //select();
-            }
+            var searchQueue = false;
+            var xsrf = xsrfExtract();
+            /**
+             * Artificial XHR life.
+             */            
             if(typeof(XMLHttpRequest)==="undefined"){
                 XMLHttpRequest = function() {
                     try{return new ActiveXObject("Msxml2.XMLHTTP.6.0");}catch(e){}
@@ -174,16 +175,30 @@
                     try{return new ActiveXObject("Microsoft.XMLHTTP");}catch(e){}
                     throw new Error("This browser does not support XMLHttpRequest.");
                 };
-            }
+            }            
+            updateCache();
+            setInterval(updateCache, {{ search_browser_cache_ttl }});
+            input.focus();
+            /**
+             * Updates the cache member value used in managing expiry of every search get request.
+             */
             function updateCache(){
-                cache = (new Date()).toString().toLowerCase().replace(/\s+/g, "-");
+                cache = cache = (new Date()).getTime();
             }
+            /**
+             * Convenience method for extracting the XSRF value used for POST, PUT or DELETE.
+             */            
             function xsrfExtract() {
                 var name = "_xsrf";
                 var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
                 return r ? r[1] : undefined;
             }
-            var xsrf = xsrfExtract();
+            /**
+             * Because innerHTML is sometimes not fast enough.
+             * @param {Object} target DOM element target for innerHTML replacement.
+             * @param {String} innerHTML The HTML to inject.
+             * @return {Object} The target DOM element. WARNING! Could be a new cloned element.
+             */            
             function turboInnerHTML(target, innerHTML) {
                 /*@cc_on //innerHTML is faster for IE
                     target.innerHTML = innerHTML;
@@ -193,8 +208,14 @@
                 targetClone.innerHTML = innerHTML;
                 target.parentNode.replaceChild(targetClone, target);
                 return targetClone;
-            }        
-            function evt(obj, event, callback, scope){
+            }
+            /**
+             * Razor thin event normalizer for adding event listeners.
+             * @param {Object} obj TBD.
+             * @param {String} event TBD.
+             * @param {Function} callback TBD.
+             */                     
+            function ezEventListener(obj, event, callback, scope){
                 if(window.addEventListener){
                    obj.addEventListener(
                         event, 
@@ -212,6 +233,9 @@
                     );
                 }
             }
+            /**
+             * Text selection abstraction. No IE support right now, sorry!
+             */
             function Selection(){
                 var self = this;
                 self.obj;
@@ -229,21 +253,22 @@
                         self.obj = document.selection.createRange();
                     }
                 }();
-            }           
-			var searchQueue = false;
+            }
+            /**
+             * Grand master search, dispatches and updates page content. 
+             * Throttles to single request channel.
+             */     
 			function s(){
 			    if(xhr){
-			        //console.log('xhr in progress enable search queue')
 			        searchQueue = true;
 			        return;
 			    }
 			    xhr = new XMLHttpRequest();
-	            var searchStr = "search="+encodeURIComponent({{json_encode(splunk_search_query_prefix) }})+encodeURIComponent(inp.value)+encodeURIComponent({{json_encode(splunk_search_query_suffix) }})+"&c="+encodeURIComponent(cache);
+	            var searchStr = "search="+encodeURIComponent({{json_encode(splunk_search_query_prefix) }})+encodeURIComponent(input.value)+encodeURIComponent({{json_encode(splunk_search_query_suffix) }})+"&c="+encodeURIComponent(cache);
 			    //var body = "_xsrf="+encodeURIComponent(xsrf)+"&"+searchStr;
 			    //xhr.open("POST", "/search", true);
 			    xhr.open("GET", "/search?"+searchStr, true);
 			    var xhrTimeout = setTimeout(function(){
-			        //console.log('xhr timeout')
 			        xhr.onreadystatechange = function(){};
 			        xhr.abort();
 			        xhr = null;
@@ -413,7 +438,7 @@
                         var str = selectObj.getRangeAt(0).toString();
                     }catch(err){}
                     if(str.length>0){
-                        inp.value = inp.value + " \"*" + str + "*\"";
+                        input.value = input.value + " \"*" + str + "*\"";
                         s();
                         return;
                     }
@@ -440,7 +465,7 @@
                         return;
                     }
                     var str = (terms[activeTermIndex].textContent)?terms[activeTermIndex].textContent:terms[activeTermIndex].innerText;
-                    inp.value = inp.value + " \"" + str + "\"";
+                    input.value = input.value + " \"" + str + "\"";
                     s();                                            
                 }
                 if(charCode<37 || charCode>40){
@@ -449,8 +474,8 @@
             }                      
             //"keydown for safari"
             navEventType = (navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1)?"keydown":"keypress";
-            phonehome = evt(document, navEventType, nav);
-            elliot = evt(document, "keyup", cupkie);
+            phonehome = ezEventListener(document, navEventType, nav);
+            elliot = ezEventListener(document, "keyup", cupkie);
         }
     )();
     </script>
