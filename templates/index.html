@@ -306,7 +306,7 @@
                     }
                 }
                 oneshotXHR.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                oneshotXHR.send();
+                oneshotXHR.send("");//empty arg for FF <3.5
             }
             /**
              * Generates a oneshot optimized search string based on the current state of the input element. Includes intelligent cache buster.
