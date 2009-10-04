@@ -51,8 +51,8 @@ class Application(tornado.web.Application):
         #shared global attributes
         xslt_file = io.open(os.path.join(settings['template_path'], "raw.xslt"), encoding="utf-8")
         self.xslt_transform = et.XSLT(et.XML("".join(xslt_file.readlines())))
-        self.session_key = self.fetch_session_key()
-    def fetch_session_key(self):
+        self.splunk_session_key = self.splunk_fetch_session_key()
+    def splunk_fetch_session_key(self):
         resource = "%s/services/auth/login" % self.settings.get("splunk_host_path")
         body = dict(
             username=self.settings.get('splunk_username'),
@@ -68,13 +68,11 @@ class Application(tornado.web.Application):
         except:
             pass
         return session_key
-    def refresh_session_key(self):
-        self.session_key = self.fetch_session_key()
         
 class BaseHandler(tornado.web.RequestHandler):
     def splunk_fetch(self, resource, data, retry=True):
         headers = dict(
-            Authorization="Splunk %s" % self.application.session_key,
+            Authorization="Splunk %s" % self.application.splunk_session_key,
         )
         request = tornado.httpclient.HTTPRequest(resource, headers=headers)
         client = tornado.httpclient.HTTPClient()
@@ -82,10 +80,12 @@ class BaseHandler(tornado.web.RequestHandler):
             return client.fetch(request)
         except tornado.httpclient.HTTPError as error:
             if "HTTP 401: Unauthorized" in error and retry:
-                self.application.refresh_session_key()
+                self.splunk_refresh_session_key()
                 return self.splunk_fetch(resource, data, retry=False)
             else:
                 raise
+    def splunk_refresh_session_key(self):
+        self.application.splunk_session_key = self.application.splunk_fetch_session_key()
     
 class HomeHandler(BaseHandler):
     def get(self):
