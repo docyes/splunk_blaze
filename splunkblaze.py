@@ -72,7 +72,7 @@ class Application(tornado.web.Application):
         self.session_key = self.fetch_session_key()
         
 class BaseHandler(tornado.web.RequestHandler):
-    def splunk_fetch(self, resource, data, reauth=True):
+    def splunk_fetch(self, resource, data, retry=True):
         headers = dict(
             Authorization="Splunk %s" % self.application.session_key,
         )
@@ -81,9 +81,9 @@ class BaseHandler(tornado.web.RequestHandler):
         try:
             return client.fetch(request)
         except tornado.httpclient.HTTPError as error:
-            if "HTTP 401: Unauthorized" in error:
+            if "HTTP 401: Unauthorized" in error and retry:
                 self.application.refresh_session_key()
-                return self.splunk_fetch(resource, data, reauth=False)
+                return self.splunk_fetch(resource, data, retry=False)
             else:
                 raise
     
