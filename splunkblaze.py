@@ -72,7 +72,20 @@ class Application(tornado.web.Application):
         self.session_key = self.fetch_session_key()
         
 class BaseHandler(tornado.web.RequestHandler):
-    pass
+    def splunk_fetch(self, resource, data, reauth=True):
+        headers = dict(
+            Authorization="Splunk %s" % self.application.session_key,
+        )
+        request = tornado.httpclient.HTTPRequest(resource, headers=headers)
+        client = tornado.httpclient.HTTPClient()
+        try:
+            return client.fetch(request)
+        except tornado.httpclient.HTTPError as error:
+            if "HTTP 401: Unauthorized" in error:
+                self.application.refresh_session_key()
+                return self.splunk_fetch(resource, data, reauth=False)
+            else:
+                raise
     
 class HomeHandler(BaseHandler):
     def get(self):
@@ -80,31 +93,20 @@ class HomeHandler(BaseHandler):
 
 class SearchHandler(BaseHandler):
     def get(self):
-        try:
-            response = self._fetch()
-        except tornado.httpclient.CurlError as error:
-            self.write("splunk&gt; not available:(")
-            return
-        except tornado.httpclient.HTTPError as error:
-            if "HTTP 401: Unauthorized" in error:
-                self.application.refresh_session_key()
-                response = self._fetch()
-        xml_doc = et.fromstring(response.body)
-        self.set_header("Expires", datetime.datetime.utcnow() + datetime.timedelta(days=365))         
-        self.render("search.html", xml_doc=xml_doc, xslt_transform=self.application.xslt_transform, search=self.get_argument("search"))
-    def _fetch(self):
         data = dict(
             search=self.get_argument("search"),
             spawn_process="1" if options.splunk_search_spawn_process else "0",
             segmentation=options.splunk_search_segmentation,
-        )        
-        resource = "%s/services/search/jobs/oneshot?%s" % (self.settings.get("splunk_host_path"), urllib.urlencode(data))
-        headers = dict(
-            Authorization="Splunk %s" % self.application.session_key,
         )
-        request = tornado.httpclient.HTTPRequest(resource, headers=headers)
-        client = tornado.httpclient.HTTPClient()
-        return client.fetch(request)
+        resource = "%s/services/search/jobs/oneshot?%s" % (self.settings.get("splunk_host_path"), urllib.urlencode(data))
+        try:
+            response = self.splunk_fetch(resource, data)
+        except:
+            self.write("splunk&gt; not available:(")
+        else:
+            xml_doc = et.fromstring(response.body)
+            self.set_header("Expires", datetime.datetime.utcnow() + datetime.timedelta(days=365))         
+            self.render("search.html", xml_doc=xml_doc, xslt_transform=self.application.xslt_transform, search=self.get_argument("search"))
         
 def main():
     tornado.options.parse_command_line()
