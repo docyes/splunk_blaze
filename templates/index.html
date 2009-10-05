@@ -147,7 +147,7 @@
     </style>
 </head>
 <body style="text-align:center; padding-top:127px; background:url({{ static_url("img/smoke.png") }}) no-repeat 0px 0px;">
-    <form action="/search" method="post" onsubmit="return false;">
+    <form action="/search/sync" method="get" onsubmit="return false;">
       {{ xsrf_form_html() }}
       <input type="text" name="s" value="" style="font-family:Consolas,Monaco,Courier New,monospace; color:#333333; border-style:solid; border-width:1px; border-color:#CCC; font-size:14px; width:80%; padding:4px;" autocomplete="off" class="s" />
     </form>
@@ -276,7 +276,7 @@
                     return;
                 }
                 oneshotXHR = new XMLHttpRequest();
-                oneshotXHR.open("GET", "/search?"+oneshotInputSearch(), true);
+                oneshotXHR.open("GET", "/search/sync?"+oneshotInputSearch(), true);
                 var xhrTimeout = setTimeout(function(){
                     oneshotXHR.onreadystatechange = function(){};
                     oneshotXHR.abort();
