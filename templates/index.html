@@ -388,18 +388,14 @@
                         resetTerms(items[activeIndex]);
                     }
                     if(keyCode==keyCodeBindings.up){
-                        if(activeIndex==-1){
-                            var el = items[items.length-1];
-                        }else if(activeIndex>0){
+                        if(activeIndex>0){
                             var el = items[activeIndex-1];
                         }else{
                             var el = items[items.length-1];
                         }
                         selectEvent(el);
                     }else if(keyCode==keyCodeBindings.down){
-                        if(activeIndex==-1){
-                            var el = items[0];
-                        }else if(activeIndex<items.length-1){
+                        if(activeIndex>-1 && activeIndex<items.length-1){
                             var el = items[activeIndex+1];
                         }else{
                             var el = items[0];
