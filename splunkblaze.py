@@ -66,7 +66,11 @@ class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
         self.async_request("/services/search/jobs/oneshot", self._on_result, session_key=self.session_key, search=self.get_argument("search"), spawn_process=spawn_process, segmentation=options.splunk_search_segmentation)
     def _on_result(self, response, xml=None, **kwargs):
         if response.error:
-            self.write("Blockage in cave! %s" % response.error)
+            if xml is not None:
+                error =  xml.findtext("messages/msg")
+                self.write(tornado.escape.xhtml_unescape("<!-- error %s -->" % error))
+            else:
+                self.write("Blockage in cave! %s" % response.error)
             self.finish()
         elif xml is not None:
             self.render("search.html", xml_doc=xml, xslt_transform=self.application.xslt_transform, search=self.get_argument("search"))

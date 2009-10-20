@@ -61,7 +61,7 @@ class SplunkMixin(object):
     def sync_request(self, pathname, post_args=None, session_key=None, **kwargs):
         """"
         A simplified syncronous http request method for splunk services.
-        Returns a tuple tornado.httpclient.HTTPResponse, xml, json and text where xml, json and text are None type if not serializable from response/content-type.
+        Returns a tuple based on parse_response method spec.
         """
         url = self.request_url(pathname, **kwargs)
         headers = self.request_headers(session_key=session_key)
@@ -74,27 +74,8 @@ class SplunkMixin(object):
             if response.error.code==401 and self.retry_request:
                 self.refresh_session_key()
                 return self.sync_request(pathname, post_args=post_args, session_key=self.session_key, **kwargs)
-            else:
-                return response, None, None, None
-        content = response.headers.get("Content-Type", "")    
-        if content.find("text/xml")!=-1:
-            try:
-                xml = et.fromstring(response.body)
-            except:
-                logging.warning("Could not parse xml")
-                return reponse, None, None, None
-            return response, xml, None, None
-        elif content.find("application/json")!=-1:
-            try:
-                json = escape.json_decode(response.body)
-            except:
-                logging.warning("Could not decode json")
-                return response, None, None, None
-            return response, None, json, None
-        elif content.find("text/plain")!=-1:
-            return response, None, None, response.body
-        else:
-            return response, None, None, None
+        xml, json, text = self.parse_response(response)
+        return response, xml, json, text
  
     def async_request(self, pathname, callback, post_args=None, session_key=None, **kwargs):
         """
@@ -122,27 +103,30 @@ class SplunkMixin(object):
                 else:
                     callback(response)
                     return
-            else:
-                callback(response)
-                return
-        content = response.headers.get("Content-Type", "")
+        xml, json, text = self.parse_response(response)
+        callback(response, xml=xml, json=json, text=text)    
+
+    def parse_response(self, response):
+        """
+        General splunk http response parser based on reponse content-type.
+        Returns a tuple tornado.httpclient.HTTPResponse, xml, json and text where xml, json and text are None type if not serializable from response/content-type.
+        """
+        content = response.headers.get("Content-Type", "")    
         if content.find("text/xml")!=-1:
             try:
                 xml = et.fromstring(response.body)
             except:
                 logging.warning("Could not parse xml")
-                callback(response)
-                return
-            callback(response, xml=xml)
+                return None, None, None
+            return xml, None, None
         elif content.find("application/json")!=-1:
             try:
                 json = escape.json_decode(response.body)
             except:
                 logging.warning("Could not decode json")
-                callback(response)
-                return
-            callback(response, json=json)            
+                return None, None, None
+            return None, json, None
         elif content.find("text/plain")!=-1:
-            callback(response, text=response.body)
+            return None, None, response.body
         else:
-            callback(response)
+            return None, None, None
