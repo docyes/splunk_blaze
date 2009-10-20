@@ -109,7 +109,7 @@ class SplunkMixin(object):
     def parse_response(self, response):
         """
         General splunk http response parser based on reponse content-type.
-        Returns a tuple tornado.httpclient.HTTPResponse, xml, json and text where xml, json and text are None type if not serializable from response/content-type.
+        Returns a tuple xml, json and text where xml, json and text are None type if not serializable from response/content-type.
         """
         content = response.headers.get("Content-Type", "")    
         if content.find("text/xml")!=-1:
