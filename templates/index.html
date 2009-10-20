@@ -431,16 +431,23 @@
                     if(keyCode==keyCodeBindings.left){
                         if(activeTermIndex>0){
                             var el = terms[activeTermIndex-1];
+                            if(hasClass(el, "time")){//disable time selection
+                                el = terms[((activeTermIndex-2>0)?activeTermIndex-2:terms.length-1)];
+                            }
                         }else{
                             var el = terms[terms.length-1];
                         }
                         addClass(el, "h");
-                        el.active = true;                        
+                        el.active = true;
+                                                
                     }else if(keyCode==keyCodeBindings.right){
 	                    if(activeTermIndex>-1 && activeTermIndex<terms.length-1){
 	                        var el = terms[activeTermIndex+1];
 	                    }else{
 	                        var el = terms[0];
+                            if(hasClass(el, "time")){//disable time selection
+                                el = terms[1];
+                            }
 	                    }
                         addClass(el, "h");
                         el.active = true;
