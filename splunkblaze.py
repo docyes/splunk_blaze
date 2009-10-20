@@ -3,15 +3,14 @@
 import os.path
 import urllib
 import io
-import datetime
 import lxml.etree as et
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
 import tornado.web
-import tornado.httpclient
 import tornado.escape
 import uimodules
+import auth
 
 from tornado.options import define, options
 
@@ -49,71 +48,32 @@ class Application(tornado.web.Application):
             debug=options.debug,
         )
         tornado.web.Application.__init__(self, handlers, **settings)
-        #shared global attributes
         xslt_file = io.open(os.path.join(settings['template_path'], "raw.xslt"), encoding="utf-8")
+        #shared global attributes 
         self.xslt_transform = et.XSLT(et.XML("".join(xslt_file.readlines())))
-        self.splunk_session_key = self.splunk_fetch_session_key()
-    def splunk_fetch_session_key(self):
-        resource = "%s/services/auth/login" % self.settings.get("splunk_host_path")
-        body = dict(
-            username=self.settings.get('splunk_username'),
-            password=self.settings.get('splunk_password') ,
-        )
-        request = tornado.httpclient.HTTPRequest(resource, method="POST", body=urllib.urlencode(body))
-        client = tornado.httpclient.HTTPClient()
-        session_key = ""
-        try:
-            response = client.fetch(request)
-            root = et.fromstring(response.body)
-            session_key = root.findtext('sessionKey')
-        except:
-            pass
-        return session_key
         
 class BaseHandler(tornado.web.RequestHandler):
-    def splunk_fetch(self, url, method="GET", body=None, retry=True):
-        headers = dict(
-            Authorization="Splunk %s" % self.application.splunk_session_key,
-        )
-        request = tornado.httpclient.HTTPRequest("%s%s" % (self.settings.get("splunk_host_path"), url), method=method, headers=headers, body=body)
-        client = tornado.httpclient.HTTPClient()
-        try:
-            return client.fetch(request)
-        except tornado.httpclient.HTTPError as error:
-            if "HTTP 401: Unauthorized" in error and retry:
-                self.splunk_refresh_session_key()
-                return self.splunk_fetch(url, method=method, body=None, retry=False)
-            else:
-                raise
-    def splunk_refresh_session_key(self):
-        self.application.splunk_session_key = self.application.splunk_fetch_session_key()
-    
-class HomeHandler(BaseHandler):
+    pass
+
+class HomeHandler(BaseHandler, auth.SplunkMixin):
     def get(self):
         self.render("index.html", search_browser_cache_ttl=self.settings.get("search_browser_cache_ttl"), splunk_search_query_prefix=self.settings.get("splunk_search_query_prefix"), splunk_search_query_suffix=self.settings.get("splunk_search_query_suffix"))
-
-class SearchHandler(BaseHandler):
-    def params(self):
-        data = dict(
-            search=self.get_argument("search"),
-            spawn_process="1" if options.splunk_search_spawn_process else "0",
-            segmentation=options.splunk_search_segmentation,
-        )
-        return urllib.urlencode(data)
-    
-class SyncSearchHandler(SearchHandler):
+            
+class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
+    @tornado.web.asynchronous
     def get(self):
-        url = "/services/search/jobs/oneshot?%s" % self.params()
-        try:
-            response = self.splunk_fetch(url)
-        except Exception as e:
-           message = tornado.escape.xhtml_unescape("splunk&gt; not available:(%s" % e)
-           self.write(message)
+        spawn_process = "1" if options.splunk_search_spawn_process else "0"
+        self.async_request("/services/search/jobs/oneshot", self._on_result, session_key=self.session_key, search=self.get_argument("search"), spawn_process=spawn_process, segmentation=options.splunk_search_segmentation)
+    def _on_result(self, response, xml=None, **kwargs):
+        if response.error:
+            self.write("Blockage in cave! %s" % response.error)
+            self.finish()
+        elif xml is not None:
+            self.render("search.html", xml_doc=xml, xslt_transform=self.application.xslt_transform, search=self.get_argument("search"))
         else:
-            xml_doc = et.fromstring(response.body)
-            self.set_header("Expires", datetime.datetime.utcnow() + datetime.timedelta(days=365))         
-            self.render("search.html", xml_doc=xml_doc, xslt_transform=self.application.xslt_transform, search=self.get_argument("search"))
-    
+            self.write(tornado.escape.xhtml_unescape("<!-- no results -->"))
+            self.finish()
+
 def main():
     tornado.options.parse_command_line()
     http_server = tornado.httpserver.HTTPServer(Application())
