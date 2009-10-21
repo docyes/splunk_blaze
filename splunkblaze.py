@@ -53,9 +53,11 @@ class Application(tornado.web.Application):
         self.xslt_transform = et.XSLT(et.XML("".join(xslt_file.readlines())))
         
 class BaseHandler(tornado.web.RequestHandler):
-    pass
+    @property
+    def xslt_transform(self):
+        return self.application.xslt_transform
 
-class HomeHandler(BaseHandler, auth.SplunkMixin):
+class HomeHandler(BaseHandler):
     def get(self):
         self.render("index.html", search_browser_cache_ttl=self.settings.get("search_browser_cache_ttl"), splunk_search_query_prefix=self.settings.get("splunk_search_query_prefix"), splunk_search_query_suffix=self.settings.get("splunk_search_query_suffix"))
             
@@ -73,7 +75,7 @@ class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
                 self.write("Blockage in cave! %s" % response.error)
             self.finish()
         elif xml is not None:
-            self.render("search.html", xml_doc=xml, xslt_transform=self.application.xslt_transform, search=self.get_argument("search"))
+            self.render("search.html", xml_doc=xml, xslt_transform=self.xslt_transform, search=self.get_argument("search"))
         else:
             self.write(tornado.escape.xhtml_unescape("<!-- no results -->"))
             self.finish()
