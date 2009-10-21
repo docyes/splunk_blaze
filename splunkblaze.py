@@ -3,6 +3,7 @@
 import os.path
 import urllib
 import io
+import datetime
 import lxml.etree as et
 import tornado.httpserver
 import tornado.ioloop
@@ -75,6 +76,7 @@ class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
                 self.write("Blockage in cave! %s" % response.error)
             self.finish()
         elif xml is not None:
+            self.set_header("Expires", datetime.datetime.utcnow() + datetime.timedelta(days=365))
             self.render("search.html", xml_doc=xml, xslt_transform=self.xslt_transform, search=self.get_argument("search"))
         else:
             self.write(tornado.escape.xhtml_unescape("<!-- no results -->"))
