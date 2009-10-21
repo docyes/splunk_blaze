@@ -30,7 +30,7 @@ chmod u+x splunkblaze.py
 
 Known Issues:
 =======
--<3.5 FF && IE Support
+-IE Support
 
 Future Features:
 =======
