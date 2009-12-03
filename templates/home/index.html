@@ -143,11 +143,17 @@
         background-color:#F5E998;
         color:#333;
     }
+    /*
+    .s_prefix:hover,  .s_prefix:focus {
+        border-color:#CCC!important;
+        color:#666!important;
+    }
+    */
     /* END: default event decorator styles */     
     </style>
 </head>
 <body style="text-align:center; padding-top:127px; background:url({{ static_url("img/smoke.png") }}) no-repeat 0px 0px;">
-    <form action="/search/sync" method="get" onsubmit="return false;">
+    <form action="/search/new" method="get" onsubmit="return false;">
       {{ xsrf_form_html() }}
       <input type="text" name="s" value="" style="font-family:Consolas,Monaco,Courier New,monospace; color:#333333; border-style:solid; border-width:1px; border-color:#CCC; font-size:14px; width:80%; padding:4px;" autocomplete="off" class="s" />
     </form>
@@ -246,6 +252,14 @@
                 }
             }
             /**
+             * Remove leading/trailing whitespace.
+             * @param {String} str The string to perform the trim opration on.
+             * @return {String} The trim formatted string.
+             */
+            function trimString(str){
+                return (str.trim)?str.trim():str.replace(/^\s*(\S*(\s+\S+)*)\s*$/, "$1");
+            }
+            /**
              * Text selection abstraction. No IE support right now, sorry!
              */
             function Selection(){
@@ -276,7 +290,7 @@
                     return;
                 }
                 oneshotXHR = new XMLHttpRequest();
-                oneshotXHR.open("GET", "/search/sync?"+oneshotInputSearch(), true);
+                oneshotXHR.open("GET", "/search/new?"+oneshotInputSearch(), true);
                 var xhrTimeout = setTimeout(function(){
                     oneshotXHR.onreadystatechange = function(){};
                     oneshotXHR.abort();
@@ -313,7 +327,16 @@
              * @return {String} The delicious string.
              */
             function oneshotInputSearch(){
-                 return "search="+encodeURIComponent({{json_encode(splunk_search_query_prefix) }})+encodeURIComponent(input.value)+encodeURIComponent({{json_encode(splunk_search_query_suffix) }})+"&c="+encodeURIComponent(cache);
+                 var search = trimString(input.value);
+                 var sid = document.getElementById("sid");
+                 var sidParam = "";
+                 if(sid){
+                     sidParam = "&sid="+encodeURIComponent(sid.value);
+                 }
+                 if(search.length==0){
+                     search = " ";
+                 }
+                 return "search="+encodeURIComponent(search)+"&c="+encodeURIComponent(cache)+sidParam;
             }
             /**
              * Key code normalizer.
@@ -502,6 +525,16 @@
                     oneshot();
                 }
             }
+            function gc(){
+                if(document.getElementById("sid")){
+	                var inputValue = input.value;
+	                input.value = "|";
+	                oneshot();
+	                input.value = inputValue;
+	                
+                }
+                
+            }
             //TODO: Clean me....
             function selectEvent(el){
                 el.active = true;
@@ -526,6 +559,7 @@
             ezEventListener(document, "keydown", dispatcher);
             ezEventListener(document, "keypress", dispatcher);
             ezEventListener(document, "keyup", dispatcher);
+            ezEventListener(window, "unload", gc);
         }
     )();
     </script>
