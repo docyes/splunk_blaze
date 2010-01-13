@@ -16,6 +16,9 @@ Install lxml Pythonic binding for the libxml2 and libxslt libraries (Optional)
 This is not necessary if you are running this on the same machine as splunk.
 http://codespeak.net/lxml/
 
+Install Splunk Blaze:
+python setup.py install
+
 Run Splunk Blaze:
 #Download http://github.com/docyes/splunk_blaze/tarball/master 
 tar zvzf docyes-splunk-blaze-*.tar.gz
