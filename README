@@ -16,10 +16,7 @@ Install lxml Pythonic binding for the libxml2 and libxslt libraries (Optional)
 This is not necessary if you are running this on the same machine as splunk.
 http://codespeak.net/lxml/
 
-Install Splunk Blaze:
-python setup.py install
-
-Run Splunk Blaze:
+Running Splunk Blaze:
 #Download http://github.com/docyes/splunk_blaze/tarball/master 
 tar zvzf docyes-splunk-blaze-*.tar.gz
 cd docyes-splunk-blaze-*
@@ -30,6 +27,9 @@ chmod u+x splunkblaze.py
 ./splunkblaze.py --help
 #Blaze! (Default port is 8888)
 ./splunkblaze.py
+
+Installing Splunk Blaze:
+python setup.py install
 
 Known Issues:
 =======
