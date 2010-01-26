@@ -6,6 +6,7 @@ import logging
 import lxml.etree as et
 
 class BufferedWriter(object):
+    """Convenience object to write and maintain ordering of rendered strings. Useful when dealing with multiple async requests."""
     def __init__(self, length, callback):
         self.buffer = [None for i in xrange(length)]
         self.count = 0
@@ -13,6 +14,7 @@ class BufferedWriter(object):
         self.callback = callback
 
     def write(self, index, data):
+        """Writes to the buffer at the specified indices. Note: Indices that are out of bounds will throw a ValueError."""
         if index<0 or index+1>self.length: 
             raise ValueError
         self.buffer[index] = data
@@ -21,7 +23,7 @@ class BufferedWriter(object):
             self.callback(string)
 
 class SplunkMixin(object):
-    """General splunk services connection mixing with shared authentication and lazy session key updating if stale/non-existant."""
+    """General splunk services connection mixin with shared authentication and lazy session key updating if stale/non-existant."""
     retry_request = True
     BufferedWriter = BufferedWriter
     
@@ -93,28 +95,28 @@ class SplunkMixin(object):
         xml, json, text = self.parse_response(response)
         return response, xml, json, text
  
-    def async_request(self, pathname, callback, post_args=None, session_key=None, **kwargs):
+    def async_request(self, pathname, callback, post_args=None, session_key=None, streaming_callback=None, request_timeout=None, **kwargs):
         """
         A simplified non-blocking asynchronous http request method for splunk services. 
         The callback is called with a response, and xml, json, and text keyword args where xml, json, and text are not passed if not serializable from response/content-type.
         """
         url = self.request_url(pathname, **kwargs)
         headers = self.request_headers(session_key=session_key)
-        callback=self.async_callback(self._on_async_response, pathname, callback, post_args=post_args, session_key=session_key, **kwargs)
+        callback=self.async_callback(self._on_async_response, pathname, callback, post_args=post_args, session_key=session_key, streaming_callback=streaming_callback, request_timeout=request_timeout, **kwargs)
         http = tornado.httpclient.AsyncHTTPClient()
         if post_args is not None:
-            http.fetch(url, method="POST", body=urllib.urlencode(post_args), callback=callback, headers=headers)
+            http.fetch(url, method="POST", body=urllib.urlencode(post_args), callback=callback, headers=headers, streaming_callback=streaming_callback, request_timeout=request_timeout)
         else:
-            http.fetch(url, callback=callback, headers=headers)
+            http.fetch(url, callback=callback, headers=headers, streaming_callback=streaming_callback, request_timeout=request_timeout)
 
-    def _on_async_response(self, pathname, callback, response, post_args=None, session_key=None, **kwargs):
+    def _on_async_response(self, pathname, callback, response, post_args=None, session_key=None, streaming_callback=None, request_timeout=None, **kwargs):
         """Reponse handler for asynchronous requests."""
         if response.error:
             if response.error.code==401 and self.retry_request:
                 self.refresh_session_key()
                 if self.session_key:
                     logging.info("Retry request with fresh session key")
-                    self.async_request(pathname, callback, post_args=post_args, session_key=self.session_key, **kwargs)
+                    self.async_request(pathname, callback, post_args=post_args, session_key=self.session_key, streaming_callback=streaming_callback, request_timeout=request_timeout, **kwargs)
                     return
                 else:
                     callback(response)
