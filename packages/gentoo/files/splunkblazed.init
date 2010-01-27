@@ -1,0 +1,19 @@
+#!/sbin/runscript
+
+depend() {
+        need net
+}
+
+start() {
+        ebegin "Starting splunkblazed"
+        start-stop-daemon --start --exec /usr/lib/python2.6/site-packages/splunkblaze/app.py \
+            --pidfile /var/run/splunkblazed.pid
+        eend $?
+}
+
+stop() {
+    ebegin "Stopping splunkblazed"
+        start-stop-daemon --stop --exec /usr/lib/python2.6/site-packages/splunkblaze/app.py \
+            --pidfile /var/run/splunkblazed.pid
+    eend $?
+}

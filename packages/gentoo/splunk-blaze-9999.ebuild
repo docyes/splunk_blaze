@@ -16,3 +16,7 @@ IUSE=""
 RDEPEND="www-servers/tornado
 	dev-python/lxml
 "
+
+src_install() {
+    newinitd "${FILESDIR}/splunkblazed.init" splunkblazed
+}
