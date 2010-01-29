@@ -95,7 +95,7 @@ class SplunkMixin(object):
         xml, json, text = self.parse_response(response)
         return response, xml, json, text
  
-    def async_request(self, pathname, callback, post_args=None, session_key=None, streaming_callback=None, request_timeout=None, **kwargs):
+    def async_request(self, pathname, callback, post_args=None, session_key=None, streaming_callback=None, request_timeout=20.0, **kwargs):
         """
         A simplified non-blocking asynchronous http request method for splunk services. 
         The callback is called with a response, and xml, json, and text keyword args where xml, json, and text are not passed if not serializable from response/content-type.
@@ -109,7 +109,7 @@ class SplunkMixin(object):
         else:
             http.fetch(url, callback=callback, headers=headers, streaming_callback=streaming_callback, request_timeout=request_timeout)
 
-    def _on_async_response(self, pathname, callback, response, post_args=None, session_key=None, streaming_callback=None, request_timeout=None, **kwargs):
+    def _on_async_response(self, pathname, callback, response, post_args=None, session_key=None, streaming_callback=None, request_timeout=20.0, **kwargs):
         """Reponse handler for asynchronous requests."""
         if response.error:
             if response.error.code==401 and self.retry_request:
