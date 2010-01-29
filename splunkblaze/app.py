@@ -7,6 +7,7 @@ import logging
 import lxml.etree as et
 import tornado.httpserver
 import tornado.ioloop
+import tornado.locale
 import tornado.options
 import tornado.web
 import uimodules
@@ -83,6 +84,7 @@ class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
 
 def main():
     tornado.options.parse_command_line()
+    tornado.locale.load_translations(os.path.join(os.path.dirname(__file__), "translations")) 
     http_server = tornado.httpserver.HTTPServer(Application())
     http_server.listen(options.port)
     tornado.ioloop.IOLoop.instance().start()
