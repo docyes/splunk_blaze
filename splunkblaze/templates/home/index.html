@@ -14,7 +14,10 @@
       padding:0px;
     }
     body {
-      background-color:#FFF;    
+      background-color:#FFF;
+      text-align:center;
+      padding-top:127px;
+      background:url({{ static_url("img/smoke.png") }}) no-repeat 0px 0px;      
     }
     h1, h2, h3, h4, h5, h6 {
       display:inline;
@@ -38,6 +41,16 @@
       margin:0px;
       padding:0px;
       list-style:none;
+    }
+    .s {
+      font-family:Consolas,Monaco,Courier New,monospace;
+      color:#333333;
+      border-style:solid;
+      border-width:1px;
+      border-color:#CCC;
+      font-size:14px;
+      width:80%;
+      padding:4px;
     }
    /* BEGIN: default event decorator styles */
     .events {
@@ -552,7 +565,7 @@
 {% block body %}
     <form action="/search/new" method="get" onsubmit="return false;">
       {{ xsrf_form_html() }}
-      <input type="text" name="s" value="" style="font-family:Consolas,Monaco,Courier New,monospace; color:#333333; border-style:solid; border-width:1px; border-color:#CCC; font-size:14px; width:80%; padding:4px;" autocomplete="off" class="s" />
+      <input type="text" name="s" value="" autocomplete="off" class="s" />
     </form>
     <div id="r"></div>
 {% end %}
