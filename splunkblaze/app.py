@@ -64,7 +64,9 @@ class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
         sync_search = "%s%s%s" % (options.splunk_search_query_prefix, self.get_argument("search"), options.splunk_search_sync_query_suffix)
         sync_spawn_process = "1" if options.splunk_search_sync_spawn_process else "0"
         self.set_header("Expires", datetime.datetime.utcnow() + datetime.timedelta(days=365))
-        self.async_request("/services/search/jobs/oneshot", self._on_create, session_key=self.session_key, count=options.splunk_search_sync_max_count, max_count=options.splunk_search_sync_max_count, search=sync_search, spawn_process=sync_spawn_process, segmentation=options.splunk_search_segmentation)
+        self.async_request("/services/search/jobs/oneshot", self._on_create, session_key=self.session_key, 
+                           count=options.splunk_search_sync_max_count, max_count=options.splunk_search_sync_max_count, 
+                           search=sync_search, spawn_process=sync_spawn_process, segmentation=options.splunk_search_segmentation)
 
     def _on_create(self, response, xml=None, **kwargs):
         if response.error:
