@@ -1,0 +1,6 @@
+<table cellpadding="0" cellspacing="0">
+<tr>
+    <td class="col2"><em class="time">{{ event.xpath("field[@k='_time']/value/text")[0].text }}</em></td>
+    <td class="col3"><pre class="event">{{ xslt_transform(event.xpath("field[@k='_raw']/v")[0]) }}</pre></td>
+</tr>
+</table>

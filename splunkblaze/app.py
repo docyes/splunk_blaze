@@ -46,7 +46,7 @@ class Application(tornado.web.Application):
             ui_modules=uimodules,
             xsrf_cookies=True,
         )
-        self.xslt_transform = et.XSLT(et.parse(os.path.join(settings["template_path"], "search", "_raw.xslt")))
+        self.xslt_transform = et.XSLT(et.parse(os.path.join(settings["template_path"], "modules", "raw.xslt")))
         tornado.web.Application.__init__(self, handlers, **settings)
         
 class BaseHandler(tornado.web.RequestHandler):
@@ -74,7 +74,7 @@ class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
                 error = response.error
             data = self.render_string("search/_error.html", error=error)
         elif xml is not None:
-            data = self.render_string("search/_results.html", xml_doc=xml, xslt_transform=self.xslt_transform, search=self.get_argument("search"), count=options.splunk_search_sync_max_count)
+            data = self.render_string("search/_results.html", xml_doc=xml, search=self.get_argument("search"), count=options.splunk_search_sync_max_count)
         else:
             data = self.render_string("search/_comment.html", comment="no results for search")
         self.finish(data)
