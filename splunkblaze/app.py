@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 import os.path
-import urllib
-import io
 import datetime
 import logging
 import lxml.etree as et
