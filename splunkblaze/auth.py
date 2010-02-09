@@ -111,18 +111,21 @@ class SplunkMixin(object):
 
     def _on_async_response(self, pathname, callback, response, post_args=None, session_key=None, streaming_callback=None, request_timeout=20.0, **kwargs):
         """Reponse handler for asynchronous requests."""
-        if response.error:
-            if response.error.code==401 and self.retry_request:
-                self.refresh_session_key()
-                if self.session_key:
-                    logging.info("Retry request with fresh session key")
-                    self.async_request(pathname, callback, post_args=post_args, session_key=self.session_key, streaming_callback=streaming_callback, request_timeout=request_timeout, **kwargs)
-                    return
-                else:
-                    callback(response)
-                    return
-        xml, json, text = self.parse_response(response)
-        callback(response, xml=xml, json=json, text=text)    
+        if self.request.connection.stream.closed():
+            return
+        else:
+            if response.error:
+                if response.error.code==401 and self.retry_request:
+                    self.refresh_session_key()
+                    if self.session_key:
+                        logging.info("Retry request with fresh session key")
+                        self.async_request(pathname, callback, post_args=post_args, session_key=self.session_key, streaming_callback=streaming_callback, request_timeout=request_timeout, **kwargs)
+                        return
+                    else:
+                        callback(response)
+                        return
+            xml, json, text = self.parse_response(response)
+            callback(response, xml=xml, json=json, text=text)    
 
     def parse_response(self, response):
         """
