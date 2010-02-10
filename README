@@ -6,37 +6,33 @@ Put this in your pipe and smoke it!
 
 Installation
 =======
-Install Tornado:
-http://www.tornadoweb.org/
-
-Install Splunk:
-http://www.splunk.com/download
-
-Install lxml Pythonic binding for the libxml2 and libxslt libraries (Optional)
-This is not necessary if you are running this on the same machine as splunk.
-http://codespeak.net/lxml/
+Dependency Cheat Sheet:
+At least Python 2.5
+http://github.com/facebook/tornado
+http://pycurl.sourceforge.net
+http://pypi.python.org/pypi/simplejson
+http://codespeak.net/lxml
 
 Running Splunk Blaze:
 #Download http://github.com/docyes/splunk_blaze/tarball/master 
 tar zvzf docyes-splunk-blaze-*.tar.gz
 cd docyes-splunk-blaze-*
-#Make splunkblaze.py executable.
-chmod u+x splunkblaze.py
-#Checkout the nifty command line options.
-#Command line formats are what you would expect ("--myoption=myvalue")
+#Checkout cli options ("--myoption=myvalue")
 ./splunkblaze.py --help
 #Blaze! (Default port is 8888)
-./splunkblaze.py
-
-Installing Splunk Blaze:
-python setup.py install
+./splunkblaze.py --splunk_host_path=https://hostname:port
 
 Known Issues:
 =======
--IE Support
+-Contextual text selection not ported to IE
 
 Future Features:
 =======
 -Faster!
 -Typeahead
 -Bookmarking
+-History
+-Parallel syncronous/asyncronous search
+-Real-time search
+-Contextual menu
+-User session based settings
