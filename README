@@ -10,7 +10,7 @@ Dependency Cheat Sheet:
 At least Python 2.5
 http://github.com/facebook/tornado
 http://pycurl.sourceforge.net
-http://pypi.python.org/pypi/simplejson
+http://pypi.python.org/pypi/simplejson (Python 2.5 users only)
 http://codespeak.net/lxml
 
 Running Splunk Blaze:
