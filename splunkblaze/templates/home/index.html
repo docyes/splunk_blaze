@@ -42,19 +42,35 @@
       padding:0px;
       list-style:none;
     }
+    form {
+        padding-right:140px;
+        padding-left:140px;
+        position:relative;
+    }
     .s {
-      font-family:Consolas,Monaco,Courier New,monospace;
-      color:#333333;
-      border-style:solid;
-      border-width:1px;
-      border-color:#CCC;
-      font-size:14px;
-      width:80%;
-      padding:4px;
+        font-family:Consolas,Monaco,Courier New,monospace;
+        color:#333333;
+        border-style:solid;
+        border-width:1px;
+        border-color:#CCC;
+        font-size:14px;
+        width:99%; /* 100 messes up ie */
+        padding:4px;
     }
     .f a {
         color:#CCC;
         text-decoration:none;
+    }
+    #clear {
+        position:absolute;
+        top:7px;
+        /*right:137px;*/
+        right:146px;
+        display:none;
+    }
+    .webkit #clear {
+        top:9px;
+        right:145px;
     }
    /* BEGIN: default event decorator styles */
     .events {
@@ -193,7 +209,8 @@
                     try{return new ActiveXObject("Microsoft.XMLHTTP");}catch(e){}
                     throw new Error("This browser does not support XMLHttpRequest.");
                 };
-            }            
+            }
+            document.body.className = (navigator.userAgent.indexOf("AppleWebKit")!=-1)?"webkit":"";
             updateCache();
             setInterval(updateCache, {{ search_browser_cache_ttl }});
             input.focus();
@@ -381,7 +398,7 @@
              */
             function dispatcher(evt, target){
                  var type = evt.type;
-                 if(type=="click" && target.className=="clear"){
+                 if(type=="mousedown" && target.id=="clear"){
                      clearAll();
                      input.focus();
                  }else if(type=="keydown" && (navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1) || type=="keypress" && !(navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1)){
@@ -530,24 +547,35 @@
                     if(keyCode==keyCodeBindings.clear){
                         clearAll();
                     }else if(trimString(input.value).length==0){
+                        toggleClearButton(false);
                         clearResultsDOM();
                     }else{
+                        toggleClearButton(true);
                         oneshot();
                     }
                 }
             }
             /**
-             * Convenience method for clearing the results DOM.
+             * Clear the results DOM.
              */
             function clearResultsDOM(){
                 turboInnerHTML(d.getElementById("r"), "&nbsp;");
             }
             /**
-             * Convenience method for clearing the results DOM and the input.
+             * Clear the results DOM and the input and hide the clear button.
              */
             function clearAll(){
                  input.value = "";
                  clearResultsDOM();
+                 toggleClearButton(false);
+            }
+            /**
+             * Control the display of the clear button.
+             *
+             * @param {Boolean} display Flag to control if the button is shown or not.
+             */
+            function toggleClearButton(display){
+                document.getElementById("clear").style.display = (display)?"block":"none";
             }
             /**
              * General garbage collection routine, pick up your trash!
@@ -581,7 +609,7 @@
                     }
                 }
             }
-            ezEventListener(document, "click", dispatcher);
+            ezEventListener(document, "mousedown", dispatcher);
             ezEventListener(document, "keydown", dispatcher);
             ezEventListener(document, "keypress", dispatcher);
             ezEventListener(document, "keyup", dispatcher);
@@ -594,7 +622,7 @@
 {% block body %}
     <form action="/search/new" method="get" onsubmit="return false;">
       {{ xsrf_form_html() }}
-      <!--<input type="image" src="{{ static_url("img/clear.png") }}" alt="Clear the search input and any results." style="position:absolute; top:7px; right:17px;" class="clear" />-->
+      <input type="image" src="{{ static_url("img/clear.png") }}" alt="Clear the search input and results" title="ESC works too!" id="clear" />
       <input type="text" name="s" value="" autocomplete="off" class="s" />
     </form>
     <div id="r">&nbsp;</div>
