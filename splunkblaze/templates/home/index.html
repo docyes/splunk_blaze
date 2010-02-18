@@ -177,7 +177,8 @@
                 "right":39,
                 "up":38,
                 "down":40,
-                "enter":13        
+                "enter":13,
+                "clear":27
             };
             var termSelectFormat = ' "%s"';
             var freeRangeSelectFormat = ' "*%s*"';
@@ -311,7 +312,7 @@
                                 selectEvent(items[0]);
                             }
                         }else{
-                            turboInnerHTML(d.getElementById("r"), "&nbsp;");
+                            clearResultsDOM();
                         }
                         oneshotXHR = null;
                         if(oneshotQueue){
@@ -380,7 +381,10 @@
              */
             function dispatcher(evt, target){
                  var type = evt.type;
-                 if(type=="keydown" && (navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1) || type=="keypress" && !(navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1)){
+                 if(type=="click" && target.className=="clear"){
+                     clearAll();
+                     input.focus();
+                 }else if(type=="keydown" && (navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1) || type=="keypress" && !(navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1)){
                      keyboardNavigate(evt, target);
                  }else if(type=="keyup"){
                      keyboardOneshot(evt, target);
@@ -520,12 +524,34 @@
                     }
                     var str = (terms[activeTermIndex].textContent)?terms[activeTermIndex].textContent:terms[activeTermIndex].innerText;
                     input.value = input.value + termSelectFormat.replace("%s", str);
-                    oneshot();                                            
-                }
-                if(keyCode!=keyCodeBindings.left && keyCode!=keyCodeBindings.right && keyCode!=keyCodeBindings.up && keyCode!=keyCodeBindings.down){
                     oneshot();
                 }
+                if(keyCode!=keyCodeBindings.left && keyCode!=keyCodeBindings.right && keyCode!=keyCodeBindings.up && keyCode!=keyCodeBindings.down){
+                    if(keyCode==keyCodeBindings.clear){
+                        clearAll();
+                    }else if(trimString(input.value).length==0){
+                        clearResultsDOM();
+                    }else{
+                        oneshot();
+                    }
+                }
             }
+            /**
+             * Convenience method for clearing the results DOM.
+             */
+            function clearResultsDOM(){
+                turboInnerHTML(d.getElementById("r"), "&nbsp;");
+            }
+            /**
+             * Convenience method for clearing the results DOM and the input.
+             */
+            function clearAll(){
+                 input.value = "";
+                 clearResultsDOM();
+            }
+            /**
+             * General garbage collection routine, pick up your trash!
+             */
             function gc(){
                 if(document.getElementById("sid")){
                     var inputValue = input.value;
@@ -553,8 +579,9 @@
                         removeClass(terms[i], "h");
                         break;
                     }
-                }                
+                }
             }
+            ezEventListener(document, "click", dispatcher);
             ezEventListener(document, "keydown", dispatcher);
             ezEventListener(document, "keypress", dispatcher);
             ezEventListener(document, "keyup", dispatcher);
@@ -567,8 +594,9 @@
 {% block body %}
     <form action="/search/new" method="get" onsubmit="return false;">
       {{ xsrf_form_html() }}
+      <!--<input type="image" src="{{ static_url("img/clear.png") }}" alt="Clear the search input and any results." style="position:absolute; top:7px; right:17px;" class="clear" />-->
       <input type="text" name="s" value="" autocomplete="off" class="s" />
     </form>
-    <div id="r"></div>
+    <div id="r">&nbsp;</div>
     <p class="f"><a href="http://www.featureblend.com">Live to code, code to live...</a></p>
 {% end %}
