@@ -52,16 +52,6 @@
       width:80%;
       padding:4px;
     }
-    .splunk-logo { 
-      display:block;
-      background:url({{ static_url("img/splunkpowered.png") }}) no-repeat 0px 0px;
-      width:175px;
-      height:57px;
-      position:absolute;
-      top:35px;
-      left:330px;
-      text-indent:-5000px;
-    }
     .f a {
         color:#CCC;
         text-decoration:none;
@@ -575,7 +565,6 @@
 {% end %}
 
 {% block body %}
-    <a href="http://www.splunk.com" class="splunk-logo">splunk</a>
     <form action="/search/new" method="get" onsubmit="return false;">
       {{ xsrf_form_html() }}
       <input type="text" name="s" value="" autocomplete="off" class="s" />
