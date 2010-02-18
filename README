@@ -13,7 +13,7 @@ http://pycurl.sourceforge.net
 http://pypi.python.org/pypi/simplejson (Python 2.5 users only)
 http://codespeak.net/lxml
 
-Running Splunk Blaze:
+Running:
 #Download http://github.com/docyes/splunk_blaze/tarball/master 
 tar zvzf docyes-splunk-blaze-*.tar.gz
 cd docyes-splunk-blaze-*
