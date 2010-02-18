@@ -18,9 +18,9 @@ Running Splunk Blaze:
 tar zvzf docyes-splunk-blaze-*.tar.gz
 cd docyes-splunk-blaze-*
 #Checkout cli options ("--myoption=myvalue")
-./splunkblaze.py --help
+./splunkblaze/app.py --help
 #Blaze! (Default port is 8888)
-./splunkblaze.py --splunk_host_path=https://hostname:port
+./splunkblaze/app.py --splunk_host_path=https://hostname:port
 
 Known Issues:
 =======
