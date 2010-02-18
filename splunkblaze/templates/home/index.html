@@ -210,7 +210,7 @@
              * Updates the cache member value used in managing expiry of every search get request.
              */
             function updateCache(){
-                cache = cache = (new Date()).getTime();
+                cache = cache = (new Date()).getTime().toString(36);
             }
             /**
              * Convenience method for extracting the XSRF value used for POST, PUT or DELETE.
@@ -544,7 +544,6 @@
                     input.value = inputValue;
                     
                 }
-                
             }
             //TODO: Clean me....
             function selectEvent(el){
