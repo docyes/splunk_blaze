@@ -16,7 +16,7 @@
     body {
       background-color:#FFF;
       text-align:center;
-      padding-top:127px;
+      padding-top:129px;
       background:url({{ static_url("img/smoke.png") }}) no-repeat 0px 0px;      
     }
     h1, h2, h3, h4, h5, h6 {
@@ -50,12 +50,8 @@
     .s {
         font-family:Consolas,Monaco,Courier New,monospace;
         color:#333333;
-        border-style:solid;
-        border-width:1px;
-        border-color:#CCC;
-        font-size:14px;
-        width:99%; /* 100 messes up ie */
-        padding:4px;
+        font-size:15px;
+        width:100%; /* 100 messes up ie */
     }
     .f a {
         color:#CCC;
@@ -63,14 +59,12 @@
     }
     #clear {
         position:absolute;
-        top:7px;
-        /*right:137px;*/
-        right:146px;
+        bottom:5px;
+        right:139px;
         display:none;
     }
     .webkit #clear {
-        top:9px;
-        right:145px;
+        bottom:6px;
     }
    /* BEGIN: default event decorator styles */
     .events {
@@ -392,6 +386,18 @@
                  }
             }
             /**
+             * DOM preventDefault normalizer.
+	     *
+	     * @param {Object} evt The native DOM event.
+             */
+            function preventDefault(evt){
+                if(evt.preventDefault){
+		    evt.preventDefault();
+		}else if(evt.returnValue){
+                    evt.returnValue = false;
+		}
+	    }
+            /**
              * Top level event dispatcher. Centralizing DOM event observers allows for more tuning and ease of management.
              * @param {Object} evt DOM event reference.
              * @param {Object} target A normalized event target.
@@ -399,7 +405,8 @@
             function dispatcher(evt, target){
                  var type = evt.type;
                  if(type=="mousedown" && target.id=="clear"){
-                     clearAll();
+                     preventDefault(evt);
+		     clearAll();
                      input.focus();
                  }else if(type=="keydown" && (navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1) || type=="keypress" && !(navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1)){
                      keyboardNavigate(evt, target);
