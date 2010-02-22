@@ -27,6 +27,8 @@ define("splunk_search_query_prefix", default="search index=_* ", help="search qu
 define("splunk_search_sync_spawn_process", default=False, help="sync search spawns new process", type=bool)
 define("splunk_search_sync_query_suffix", default="* | fields", help="sync search query suffix", type=str)
 define("splunk_search_sync_max_count", default=10, help="sync search number of events that can be accessible in any given status bucket", type=int)
+#ui options
+define("display_event_time", default=True, help="control the display of the event time", type=bool)
 
 class Application(tornado.web.Application):
     def __init__(self):
@@ -75,7 +77,7 @@ class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
                 error = response.error
             data = self.render_string("search/_error.html", error=error)
         elif xml is not None:
-            data = self.render_string("search/_results.html", xml_doc=xml, search=self.get_argument("search"), count=options.splunk_search_sync_max_count)
+            data = self.render_string("search/_results.html", xml_doc=xml, search=self.get_argument("search"), count=options.splunk_search_sync_max_count, display_event_time=options.display_event_time)
         else:
             data = self.render_string("search/_comment.html", comment="no results for search")
         self.finish(data)
