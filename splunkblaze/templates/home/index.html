@@ -66,6 +66,14 @@
     .webkit #clear {
         bottom:6px;
     }
+    #loader { 
+        position:absolute;
+        width:16px;
+        height:16px;
+        bottom:6px;
+        left:-1000px;/*hide based on left for ff as it does not maintain animated gif state.*/
+        background:url({{ static_url("img/loader.gif") }});    
+    }
    /* BEGIN: default event decorator styles */
     .events {
         padding:0px 12px 12px 12px;
@@ -302,6 +310,7 @@
                     oneshotQueue = true;
                     return;
                 }
+                toggleLoader(true);
                 oneshotXHR = new XMLHttpRequest();
                 oneshotXHR.open("GET", "/search/new?"+oneshotInputSearch(), true);
                 var xhrTimeout = setTimeout(function(){
@@ -311,6 +320,8 @@
                     if(oneshotQueue){
                         oneshotQueue = false;
                         oneshot();
+                    }else{
+                        toggleLoader(false);
                     }
                 }, oneshotTimeout);
                 oneshotXHR.onreadystatechange = function(){
@@ -329,6 +340,8 @@
                         if(oneshotQueue){
                             oneshotQueue = false;
                             oneshot();
+                        }else{
+                            toggleLoader(false);
                         }
                     }
                 }
@@ -585,6 +598,15 @@
                 document.getElementById("clear").style.display = (display)?"block":"none";
             }
             /**
+             * Control the display of the loader icon. Works around limitations of some browsers (FF)
+             * that reset animated gif state by using -left position.
+             * 
+             * @param {Boolean) display Control the display state of the animated loader.
+             */
+            function toggleLoader(display){
+                document.getElementById("loader").style.left = (display)?"110px":"-1000px";
+            }
+            /**
              * General garbage collection routine, pick up your trash!
              */
             function gc(){
@@ -629,6 +651,7 @@
 {% block body %}
     <form action="/search/new" method="get" onsubmit="return false;">
       {{ xsrf_form_html() }}
+      <div id="loader"></div>
       <input type="image" src="{{ static_url("img/clear.png") }}" alt="Clear the search input and results" title="ESC works too!" id="clear" />
       <input type="text" name="s" value="" autocomplete="off" class="s" />
     </form>
