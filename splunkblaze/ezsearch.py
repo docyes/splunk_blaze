@@ -22,8 +22,9 @@ def expand(search):
     $ python ezsearch.py '~foo ~"foo" "baz" -"bart bag foo" ~barf'                                                                                                                          
     EZSEARCH:       ~foo ~"foo" "baz" -"bart bag foo" ~barf                                                                                                                                             
     FULLSEARCH:     eventtype=*foo* eventtype="foo" "baz" NOT "bart bag foo" eventtype=*barf*
-    """    
-    search = re.sub('(^|\\s*)([^~-]\\S+)($|\\s*)', "\\1*\\2*\\3",      search)
+    """
+    search = re.sub('(^|\\s*)([^~-]\\S+)($|\\s*)', "\\1\\2*\\3",      search)     
+    #search = re.sub('(^|\\s*)([^~-]\\S+)($|\\s*)', "\\1*\\2*\\3",      search)
     search = re.sub("(\\s*)~(\\S)",                "\\1eventtype=\\2", search)
     search = re.sub("(\\s*)-(\\S)",                "\\1NOT \\2",       search)
 
