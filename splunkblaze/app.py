@@ -9,13 +9,13 @@ import tornado.locale
 import tornado.options
 import tornado.web
 import uimodules
+import ezsearch
 import auth
 from tornado.options import define, options
 
 #app options
 define("port", default=8888, help="web server port", type=int)
 define("debug", default=False, help="web server debug mode", type=bool)
-define("search_browser_cache_ttl", default=30000, help="maximum browser cache lifetime for a search", type=int)
 #splunkd options
 define("splunk_host_path", default="http://localhost:8089", help="server scheme://host:port (http is faster than https)")
 define("splunk_username", default="admin", help="username")
@@ -28,7 +28,9 @@ define("splunk_search_sync_spawn_process", default=False, help="sync search spaw
 define("splunk_search_sync_query_suffix", default="* | fields", help="sync search query suffix", type=str)
 define("splunk_search_sync_max_count", default=10, help="sync search number of events that can be accessible in any given status bucket", type=int)
 #ui options
+define("search_browser_cache_ttl", default=30000, help="maximum browser cache lifetime for a search", type=int)
 define("display_event_time", default=True, help="control the display of the event time", type=bool)
+define("enable_ezsearch", default=False, help="EXPERIMENTAL!!! use the ezsearch module for simplified search string parsing", type=str)
 
 class Application(tornado.web.Application):
     def __init__(self):
@@ -62,7 +64,9 @@ class HomeHandler(BaseHandler):
 class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
     @tornado.web.asynchronous
     def get(self):
-        sync_search = "%s%s%s" % (options.splunk_search_query_prefix, self.get_argument("search"), options.splunk_search_sync_query_suffix)
+        search = self.get_argument("search")
+        search = ezsearch.expand(search) if options.enable_ezsearch else search
+        sync_search = "%s%s%s" % (options.splunk_search_query_prefix, search, options.splunk_search_sync_query_suffix)
         sync_spawn_process = "1" if options.splunk_search_sync_spawn_process else "0"
         self.set_header("Expires", datetime.datetime.utcnow() + datetime.timedelta(days=365))
         self.async_request("/services/search/jobs/oneshot", self._on_create, session_key=self.session_key, 
