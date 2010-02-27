@@ -83,7 +83,7 @@ class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
         elif xml is not None:
             data = self.render_string("search/_results.html", xml_doc=xml, search=self.get_argument("search"), count=options.splunk_search_sync_max_count, display_event_time=options.display_event_time)
         else:
-            data = self.render_string("search/_comment.html", comment="no results for search")
+            data = self.render_string("search/_none.html")
         self.finish(data)
 
 def main():
