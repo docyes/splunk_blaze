@@ -407,16 +407,16 @@
             }
             /**
              * DOM preventDefault normalizer.
-	     *
-	     * @param {Object} evt The native DOM event.
+             *
+             * @param {Object} evt The native DOM event.
              */
             function preventDefault(evt){
                 if(evt.preventDefault){
-		    evt.preventDefault();
-		}else if(evt.returnValue){
+                    evt.preventDefault();
+                }else if(evt.returnValue){
                     evt.returnValue = false;
-		}
-	    }
+                }
+            }
             /**
              * Top level event dispatcher. Centralizing DOM event observers allows for more tuning and ease of management.
              * @param {Object} evt DOM event reference.
@@ -426,7 +426,7 @@
                  var type = evt.type;
                  if(type=="mousedown" && target.id=="clear"){
                      preventDefault(evt);
-		     clearAll();
+                     clearAll();
                      input.focus();
                  }else if(type=="keydown" && (navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1) || type=="keypress" && !(navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1)){
                      keyboardNavigate(evt, target);
