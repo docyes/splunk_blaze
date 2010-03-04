@@ -194,6 +194,7 @@
             var d = document;
             var input = document.forms[0].elements['s'];
             var cache;
+            var lastHash = "";
             var oneshotQueue = false;
             var oneshotTimeout = 2000;
             var xsrf = xsrfExtract();
@@ -336,6 +337,7 @@
                         clearTimeout(xhrTimeout);
                         if(oneshotXHR.status==200){
                             turboInnerHTML(d.getElementById("r"), oneshotXHR.responseText);
+                            setSearchHashFromInput(document.getElementById("q"));
                             var items = getEvents();
                             if(items.length>0){
                                 selectEvent(items[0]);
@@ -407,16 +409,16 @@
             }
             /**
              * DOM preventDefault normalizer.
-	     *
-	     * @param {Object} evt The native DOM event.
+             *
+             * @param {Object} evt The native DOM event.
              */
             function preventDefault(evt){
                 if(evt.preventDefault){
-		    evt.preventDefault();
-		}else if(evt.returnValue){
+                    evt.preventDefault();
+                }else if(evt.returnValue){
                     evt.returnValue = false;
-		}
-	    }
+                }
+            }
             /**
              * Top level event dispatcher. Centralizing DOM event observers allows for more tuning and ease of management.
              * @param {Object} evt DOM event reference.
@@ -426,7 +428,7 @@
                  var type = evt.type;
                  if(type=="mousedown" && target.id=="clear"){
                      preventDefault(evt);
-		     clearAll();
+                     clearAll();
                      input.focus();
                  }else if(type=="keydown" && (navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1) || type=="keypress" && !(navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1)){
                      keyboardNavigate(evt, target);
@@ -574,6 +576,7 @@
                     if(keyCode==keyCodeBindings.clear){
                         clearAll();
                     }else if(trimString(input.value).length==0){
+                        setHash("");
                         toggleClearButton(false);
                         clearResultsDOM();
                     }else{
@@ -593,6 +596,7 @@
              */
             function clearAll(){
                  input.value = "";
+                 setHash("");
                  clearResultsDOM();
                  toggleClearButton(false);
             }
@@ -624,7 +628,42 @@
                     input.value = inputValue;
                 }
             }
+            /**
+             * Shorthand for setting the window.location.hash and internal state member used for history management (back button).
+             */
+            function setHash(str){
+                 window.location.hash = str;
+                 lastHash = getHash();
+            }
+            /**
+             * Accessor for safely retrieving the properly encoded location hash.
+             * 
+             * @return {String}
+             */
+            function getHash(){
+                return window.location.href.split("#")[1] || "";
+            }
+            /**
+             * Convenience method for setting the search hash from a DOM element object.
+             * 
+             * @param {Object} obj DOM element reference to object with a value attribute.
+             */            
+            function setSearchHashFromInput(obj){
+                if(obj && obj.value){
+                    setHash("q=" + obj.value);
+                }
+            }
             //TODO: Clean me....
+            function hashChange(){
+                var currentHash = getHash();
+                if(currentHash!=lastHash){
+                    lastHash = currentHash;
+                    var index = currentHash.indexOf("=");
+                    searchValue = (index>-1)?currentHash.substring(index+1):"";
+                    input.value = decodeURIComponent(searchValue);
+                    oneshot();
+                }
+            }
             function selectEvent(el){
                 el.active = true;
                 el.style.background = "url({{ static_url("img/arrow.png") }}) no-repeat 0px 7px";
@@ -645,6 +684,13 @@
                     }
                 }
             }
+            //if("onhashchange" in window){
+            //requires logic changes.
+            //    ezEventListener(window, "hashchange", hashChange);
+            //}else{
+                setInterval(hashChange, 400);
+            //}
+            ezEventListener(window, "load", hashChange);
             ezEventListener(document, "mousedown", dispatcher);
             ezEventListener(document, "keydown", dispatcher);
             ezEventListener(document, "keypress", dispatcher);

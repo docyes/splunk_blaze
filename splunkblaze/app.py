@@ -11,6 +11,7 @@ import tornado.web
 import uimodules
 import ezsearch
 import auth
+import util
 from tornado.options import define, options
 
 #app options
@@ -79,11 +80,11 @@ class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
                 error = xml.findtext("messages/msg")
             else:
                 error = response.error
-            data = self.render_string("search/_error.html", error=error)
+            data = self.render_string("search/_error.html", error=error, search=self.get_argument("search"), encode_uri_component=util.encode_uri_component)
         elif xml is not None:
-            data = self.render_string("search/_results.html", xml_doc=xml, search=self.get_argument("search"), count=options.splunk_search_sync_max_count, display_event_time=options.display_event_time)
+            data = self.render_string("search/_results.html", xml_doc=xml, search=self.get_argument("search"), count=options.splunk_search_sync_max_count, display_event_time=options.display_event_time, encode_uri_component=util.encode_uri_component)
         else:
-            data = self.render_string("search/_none.html")
+            data = self.render_string("search/_none.html", search=self.get_argument("search"), encode_uri_component=util.encode_uri_component)
         self.finish(data)
 
 def main():
