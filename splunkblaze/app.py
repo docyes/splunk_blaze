@@ -32,6 +32,8 @@ define("splunk_search_sync_max_count", default=10, help="sync search number of e
 define("search_browser_cache_ttl", default=30000, help="maximum browser cache lifetime for a search", type=int)
 define("display_event_time", default=True, help="control the display of the event time", type=bool)
 define("enable_ezsearch", default=False, help="EXPERIMENTAL!!! use the ezsearch module for simplified search string parsing", type=str)
+define("enable_search_loader", default=False, help="control the display of the search loader animation when a search is running", type=bool)
+define("enable_clear_button", default=False, help="control the display of the clear button for a search", type=bool)
 
 class Application(tornado.web.Application):
     def __init__(self):
@@ -60,7 +62,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
 class HomeHandler(BaseHandler):
     def get(self):
-        self.render("home/index.html", search_browser_cache_ttl=options.search_browser_cache_ttl)
+        self.render("home/index.html", enable_clear_button=options.enable_clear_button, enable_search_loader=options.enable_search_loader, search_browser_cache_ttl=options.search_browser_cache_ttl)
 
 class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
     @tornado.web.asynchronous

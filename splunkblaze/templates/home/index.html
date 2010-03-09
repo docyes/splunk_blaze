@@ -197,6 +197,8 @@
             var lastHash = "";
             var oneshotQueue = false;
             var oneshotTimeout = 2000;
+            var enableClearButton = {{ "true" if enable_clear_button else "false" }};
+            var enableSearchLoader = {{ "true" if enable_search_loader else "false" }};
             var xsrf = xsrfExtract();
             var keyCodeBindings = {
                 "left":37,
@@ -606,7 +608,9 @@
              * @param {Boolean} display Flag to control if the button is shown or not.
              */
             function toggleClearButton(display){
-                document.getElementById("clear").style.display = (display)?"block":"none";
+                 if(enableClearButton){
+                     document.getElementById("clear").style.display = (display)?"block":"none";
+                 }
             }
             /**
              * Control the display of the loader icon. Works around limitations of some browsers (FF)
@@ -615,7 +619,9 @@
              * @param {Boolean) display Control the display state of the animated loader.
              */
             function toggleLoader(display){
-                document.getElementById("loader").style.left = (display)?"110px":"-1000px";
+                if(enableSearchLoader){
+                    document.getElementById("loader").style.left = (display)?"110px":"-1000px";
+                }
             }
             /**
              * General garbage collection routine, pick up your trash!
