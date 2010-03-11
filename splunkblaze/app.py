@@ -12,6 +12,7 @@ import uimodules
 import ezsearch
 import auth
 import escape
+import web
 from tornado.options import define, options
 
 #app options
@@ -61,7 +62,7 @@ class BaseHandler(tornado.web.RequestHandler):
         return self.application.xslt_transform
     
     def render_string(self, template_name, **kwargs):
-        return tornado.web.RequestHandler.render_string(self, template_name, encode_uri_component=escape.encode_uri_component, **kwargs)
+        return tornado.web.RequestHandler.render_string(self, template_name, contextual_class_name=web.contextual_class_name(self), encode_uri_component=escape.encode_uri_component, **kwargs)
 
 class HomeHandler(BaseHandler):
     def get(self):

@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+def contextual_class_name(obj):
+    """Takes an object reference and derives a css class name. Used primarily for deriving a contextual css selector per handler."""
+    return obj.__class__.__name__.lower().replace("handler", "")
+
 class BufferedWriter(object):
     """Convenience object to write and maintain ordering of rendered strings. Useful when dealing with multiple async requests and buffering responses."""
     def __init__(self, length, callback):

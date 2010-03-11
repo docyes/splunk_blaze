@@ -8,12 +8,13 @@
     <meta name="author" content="Dr. Yes, spam at featureblend.com" />
     <meta name="robots" content="index,follow" />
     <meta name="revisit-after" content="10 days" />
-    <meta name="description" content="" />
-    <meta name="keywords" content="" />
+    <meta name="description" content="{% block description %}{% end %}" />
+    <meta name="keywords" content="{% block keywords %}{% end %}" />
     <title>blaze&gt;{% block title %}{% end %}</title>
+    <link rel="stylesheet" href="{{ static_url("css/base.css") }}" type="text/css" />
     {% block css %}{% end %}
 </head>
-<body>
+<body class="{{ contextual_class_name }}">
 {% block body %}{% end %}
 {% block js %}{% end %}
 </body>
