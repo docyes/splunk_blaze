@@ -12,10 +12,18 @@
     <meta name="keywords" content="{% block keywords %}{% end %}" />
     <title>blaze&gt;{% block title %}{% end %}</title>
     <link rel="stylesheet" href="{{ static_url("css/base.css") }}" type="text/css" />
-    {% block css %}{% end %}
+    <style type="text/css">
+    {% apply cssmin %}
+        {% block css %}{% end %}
+    {% end %}
+    </style>
 </head>
 <body class="{{ contextual_class_name }}">
 {% block body %}{% end %}
-{% block js %}{% end %}
+<script type="text/javascript">
+{% apply jsmin %}
+    {% block js %}{% end %}
+{% end %}
+</script>
 </body>
 </html>
