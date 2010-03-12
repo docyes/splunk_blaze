@@ -508,7 +508,7 @@
     //}else{
         setInterval(hashChange, 400);
     //}
-    ezEventListener(window, "load", hashChange);
+    hashChange();
     ezEventListener(document, "mousedown", dispatcher);
     ezEventListener(document, "keydown", dispatcher);
     ezEventListener(document, "keypress", dispatcher);
