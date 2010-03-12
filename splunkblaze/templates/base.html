@@ -22,6 +22,7 @@
 {% block body %}{% end %}
 <script type="text/javascript">
 {% apply jsmin %}
+    {% include "base.js" %} 
     {% block js %}{% end %}
 {% end %}
 </script>

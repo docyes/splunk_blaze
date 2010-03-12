@@ -11,7 +11,7 @@
     var oneshotTimeout = 2000;
     var enableClearButton = {{ "true" if enable_clear_button else "false" }};
     var enableSearchLoader = {{ "true" if enable_search_loader else "false" }};
-    var xsrf = xsrfExtract();
+    var xsrf = blaze.base.xsrfExtract();
     var keyCodeBindings = {
         "left":37,
         "right":39,
@@ -45,85 +45,6 @@
         cache = cache = (new Date()).getTime().toString(36);
     }
     /**
-     * Convenience method for extracting the XSRF value used for POST, PUT or DELETE.
-     * TODO: Multitype returns are bad design.
-     * @return {String||undefined}
-     */            
-    function xsrfExtract() {
-        var name = "_xsrf";
-        var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
-        return r ? r[1] : undefined;
-    }
-    /**
-     * Because innerHTML is sometimes not fast enough.
-     * @param {Object} target DOM element target for innerHTML replacement.
-     * @param {String} innerHTML The HTML to inject.
-     * @return {Object} The target DOM element. WARNING! Could be a new cloned element.
-     */            
-    function turboInnerHTML(target, innerHTML) {
-        /*@cc_on //innerHTML is faster for IE
-            target.innerHTML = innerHTML;
-            return target;
-        @*/
-        var targetClone = target.cloneNode(false);
-        targetClone.innerHTML = innerHTML;
-        target.parentNode.replaceChild(targetClone, target);
-        return targetClone;
-    }
-    /**
-     * Razor thin event normalizer for adding event listeners.
-     * @param {Object} obj TBD.
-     * @param {String} event TBD.
-     * @param {Function} callback TBD.
-     */                     
-    function ezEventListener(obj, event, callback, scope){
-        if(window.addEventListener){
-           obj.addEventListener(
-                event, 
-                function(evt){
-                   callback(evt, evt.target);
-                },
-               false
-           );
-       }else if(window.attachEvent){
-            obj.attachEvent(
-                "on"+event,
-                function(){
-                    callback(window.event, window.event.srcElement);
-                }
-            );
-        }
-    }
-    /**
-     * Remove leading/trailing whitespace.
-     * @param {String} str The string to perform the trim opration on.
-     * @return {String} The trim formatted string.
-     */
-    function trimString(str){
-        return (str.trim)?str.trim():str.replace(/^\s*(\S*(\s+\S+)*)\s*$/, "$1");
-    }
-    /**
-     * Text selection abstraction. No IE support right now, sorry!
-     */
-    function Selection(){
-        var self = this;
-        self.obj;
-        self.getRangeAt = function(index){
-            if(self.obj.getRangeAt){
-                return self.obj.getRangeAt(index);
-            }else{
-                return false;
-            }
-        }
-        self.Selection = function(){
-            if(window.getSelection){
-                self.obj = window.getSelection();
-            }else if(document.selection){
-                self.obj = document.selection.createRange();
-            }
-        }();
-    }
-    /**
      * Dispatches and updates page content based on a highly tuned oneshot search. 
      * Single request channel throttled.
      */
@@ -150,7 +71,7 @@
             if(oneshotXHR.readyState===4){
                 clearTimeout(xhrTimeout);
                 if(oneshotXHR.status==200){
-                    turboInnerHTML(d.getElementById("r"), oneshotXHR.responseText);
+                    blaze.base.turboInnerHTML(d.getElementById("r"), oneshotXHR.responseText);
                     setSearchHashFromInput(document.getElementById("q"));
                     var items = getEvents();
                     if(items.length>0){
@@ -176,7 +97,7 @@
      * @return {String} The delicious string.
      */
     function oneshotInputSearch(){
-         var search = trimString(input.value);
+         var search = blaze.base.trimString(input.value);
          var sid = document.getElementById("sid");
          var sidParam = "";
          if(sid){
@@ -188,52 +109,6 @@
          return "search="+encodeURIComponent(search)+"&c="+encodeURIComponent(cache)+sidParam;
     }
     /**
-     * Key code normalizer.
-     * @param {Object} evt A DOM event.
-     * @return {Number}
-     */
-    function getKeyCode(evt){
-        return (evt.which)?evt.which:evt.keyCode;
-    }
-    /**
-     * Checks if an element has a specified class or not.
-     * @param {Object} el The target element.
-     * @param {String} cl The class name to check against.
-     * @return {Boolean}
-     */
-    function hasClass(el, cl) {
-         return el.className.match(new RegExp('(\\s|^)'+cl+'(\\s|$)'));
-    }
-    /** 
-     * Safely adds an additional class to an element if it does not exist already. Caution this is an element MUTATOR!
-     */
-    function addClass(el ,cl) {
-         if(!hasClass(el, cl)) el.className += " "+ cl;
-    }
-    /**
-     * Safely removes a class from an element.
-     * @param {Object} el The target element.
-     * @param {String} cl The class name to check against.
-     */
-    function removeClass(el, cl) {
-         if(hasClass(el, cl)){
-             var reg = new RegExp('(\\s|^)'+cl+'(\\s|$)');
-             el.className = el.className.replace(reg,' ');
-         }
-    }
-    /**
-     * DOM preventDefault normalizer.
-     *
-     * @param {Object} evt The native DOM event.
-     */
-    function preventDefault(evt){
-        if(evt.preventDefault){
-            evt.preventDefault();
-        }else if(evt.returnValue){
-            evt.returnValue = false;
-        }
-    }
-    /**
      * Top level event dispatcher. Centralizing DOM event observers allows for more tuning and ease of management.
      * @param {Object} evt DOM event reference.
      * @param {Object} target A normalized event target.
@@ -241,7 +116,7 @@
     function dispatcher(evt, target){
          var type = evt.type;
          if(type=="mousedown" && target.id=="clear"){
-             preventDefault(evt);
+             blaze.base.preventDefault(evt);
              clearAll();
              input.focus();
          }else if(type=="keydown" && (navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1) || type=="keypress" && !(navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1)){
@@ -257,7 +132,7 @@
      * @param {Object} target A normalized event target.             
      */
     function keyboardNavigate(evt, target){
-        var keyCode = getKeyCode(evt);
+        var keyCode = blaze.base.getKeyCode(evt);
         if(keyCode==keyCodeBindings.up || keyCode==keyCodeBindings.down){
             var items = getEvents();
             if(items.length==0){
@@ -311,7 +186,7 @@
             for(var i=0; i<terms.length; i++){
                 if(terms[i].active){
                     terms[i].active = false;
-                    removeClass(terms[i], "h");
+                    blaze.base.removeClass(terms[i], "h");
                     activeTermIndex  = i;
                     break;
                 }
@@ -319,24 +194,24 @@
             if(keyCode==keyCodeBindings.left){
                 if(activeTermIndex>0){
                     var el = terms[activeTermIndex-1];
-                    if(hasClass(el, "time")){//disable time selection
+                    if(blaze.base.hasClass(el, "time")){//disable time selection
                         el = terms[((activeTermIndex-2>0)?activeTermIndex-2:terms.length-1)];
                     }
                 }else{
                     var el = terms[terms.length-1];
                 }
-                addClass(el, "h");
+                blaze.base.addClass(el, "h");
                 el.active = true;                                                
             }else if(keyCode==keyCodeBindings.right){
                 if(activeTermIndex>-1 && activeTermIndex<terms.length-1){
                     var el = terms[activeTermIndex+1];
                 }else{
                     var el = terms[0];
-                    if(hasClass(el, "time")){//disable time selection
+                    if(blaze.base.hasClass(el, "time")){//disable time selection
                         el = terms[1];
                     }
                 }
-                addClass(el, "h");
+                blaze.base.addClass(el, "h");
                 el.active = true;
             }
         }
@@ -348,10 +223,10 @@
      * @param {Object} target A normalized event target.             
      */ 
     function keyboardOneshot(evt, target){
-        var keyCode = getKeyCode(evt);
+        var keyCode = blaze.base.getKeyCode(evt);
         if(keyCode==keyCodeBindings.enter){
             var str = "";
-            var selectObj = new Selection();
+            var selectObj = new blaze.base.Selection();
             try{
                 var str = selectObj.getRangeAt(0).toString();
             }catch(err){}
@@ -389,7 +264,7 @@
         if(keyCode!=keyCodeBindings.left && keyCode!=keyCodeBindings.right && keyCode!=keyCodeBindings.up && keyCode!=keyCodeBindings.down){
             if(keyCode==keyCodeBindings.clear){
                 clearAll();
-            }else if(trimString(input.value).length==0){
+            }else if(blaze.base.trimString(input.value).length==0){
                 setHash("");
                 toggleClearButton(false);
                 clearResultsDOM();
@@ -403,7 +278,7 @@
      * Clear the results DOM.
      */
     function clearResultsDOM(){
-        turboInnerHTML(d.getElementById("r"), "&nbsp;");
+        blaze.base.turboInnerHTML(d.getElementById("r"), "&nbsp;");
     }
     /**
      * Clear the results DOM and the input and hide the clear button.
@@ -451,15 +326,7 @@
      */
     function setHash(str){
          window.location.hash = str;
-         lastHash = getHash();
-    }
-    /**
-     * Accessor for safely retrieving the properly encoded location hash.
-     * 
-     * @return {String}
-     */
-    function getHash(){
-        return window.location.href.split("#")[1] || "";
+         lastHash = blaze.base.getHash();
     }
     /**
      * Convenience method for setting the search hash from a DOM element object.
@@ -473,7 +340,7 @@
     }
     //TODO: Clean me....
     function hashChange(){
-        var currentHash = getHash();
+        var currentHash = blaze.base.getHash();
         if(currentHash!=lastHash){
             lastHash = currentHash;
             var index = currentHash.indexOf("=");
@@ -497,21 +364,21 @@
         for(var i=0; i<terms.length; i++){
             if(terms[i].active){
                 terms[i].active = false;
-                removeClass(terms[i], "h");
+                blaze.base.removeClass(terms[i], "h");
                 break;
             }
         }
     }
     //if("onhashchange" in window){
     //requires logic changes.
-    //    ezEventListener(window, "hashchange", hashChange);
+    //    blaze.base.ezEventListener(window, "hashchange", hashChange);
     //}else{
         setInterval(hashChange, 400);
     //}
     hashChange();
-    ezEventListener(document, "mousedown", dispatcher);
-    ezEventListener(document, "keydown", dispatcher);
-    ezEventListener(document, "keypress", dispatcher);
-    ezEventListener(document, "keyup", dispatcher);
-    ezEventListener(window, "unload", gc);
+    blaze.base.ezEventListener(document, "mousedown", dispatcher);
+    blaze.base.ezEventListener(document, "keydown", dispatcher);
+    blaze.base.ezEventListener(document, "keypress", dispatcher);
+    blaze.base.ezEventListener(document, "keyup", dispatcher);
+    blaze.base.ezEventListener(window, "unload", gc);
 })();
