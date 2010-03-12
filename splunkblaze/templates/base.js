@@ -25,7 +25,7 @@ blaze.base = {
      * Safely adds an additional class to an element if it does not exist already. Caution this is an element MUTATOR!
      */
     addClass: function(el ,cl) {
-         if(!hasClass(el, cl)) el.className += " "+ cl;
+         if(!this.hasClass(el, cl)) el.className += " "+ cl;
     },
     /**
      * Safely removes a class from an element.
@@ -33,7 +33,7 @@ blaze.base = {
      * @param {String} cl The class name to check against.
      */
     removeClass: function(el, cl) {
-         if(hasClass(el, cl)){
+         if(this.hasClass(el, cl)){
              var reg = new RegExp('(\\s|^)'+cl+'(\\s|$)');
              el.className = el.className.replace(reg,' ');
          }
