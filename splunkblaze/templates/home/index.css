@@ -1,0 +1,139 @@
+body.{{ contextual_class_name }} {
+  text-align:center;
+  padding-top:129px;
+  background:url({{ static_url("img/smoke.png") }}) no-repeat 0px 0px;
+}
+body.{{ contextual_class_name }} form {
+    padding-right:140px;
+    padding-left:140px;
+    position:relative;
+}
+body.{{ contextual_class_name }} .s {
+    font-family:Consolas,Monaco,Courier New,monospace;
+    color:#333333;
+    font-size:15px;
+    width:100%; /* 100 messes up ie */
+}
+body.{{ contextual_class_name }} .f a {
+    color:#CCC;
+    text-decoration:none;
+}
+body.{{ contextual_class_name }} #clear {
+    position:absolute;
+    bottom:5px;
+    right:139px;
+    display:none;
+}
+body.{{ contextual_class_name }} .webkit #clear {
+    bottom:6px;
+}
+body.{{ contextual_class_name }} #loader { 
+    position:absolute;
+    width:16px;
+    height:16px;
+    bottom:6px;
+    left:-1000px;/*hide based on left for ff as it does not maintain animated gif state.*/
+    background:url({{ static_url("img/loader.gif") }});    
+}
+body.{{ contextual_class_name }} .none {
+    display:block;
+    padding-top:24px;
+    font-size:12px;
+    font-weight:bold;
+}
+/* BEGIN: default event decorator styles */
+.events {
+    padding:0px 12px 12px 12px;
+    text-align:left;
+}
+.events .default {
+    zoom:1;
+    display:block;
+    margin-bottom:0px;
+    padding:8px 0px 8px 0px;
+    border-bottom:1px dotted #EEDDDD;  
+}
+.events .default:hover {
+    /* nothing */
+}
+.events .default td {
+    text-align:left;
+}
+.events .default .col1 {
+    padding-right:8px;
+    min-width:18px;
+    vertical-align:top; 
+}
+.events .default .col2 {
+    padding-top:2px;
+    padding-right:8px;
+    padding-left:22px;
+    vertical-align:top;
+    /*single line*/
+    white-space: nowrap;
+}
+.events .default .col3 {
+    padding-top:2px;
+    vertical-align:top;
+}
+.events .default .t, .events .default .fields .v, .events .default .fields .tg, .events .default .time {
+    font-style:normal;
+}
+.events .default .time {
+    color:#666;
+}
+.events .default .time, .events .default .event {
+    font-family:Consolas, Monaco, Courier New, monospace;
+    font-size:12px;
+}
+.events .default .event {
+    margin:0px 0px 0px 0px;
+    zoom:1;
+    color:#333;
+}
+.events .default .event {
+    word-wrap:break-word; /* IE 5.5-7 */
+    white-space:-moz-pre-wrap; /* Firefox 1.0-2.0 */
+    white-space:pre-wrap; /* current browsers */
+    ?white-space:normal;
+}
+.events .default .fields {
+    margin:0px;
+    padding:0px;
+    list-style:none;
+}
+.events .default .fields li {
+    padding:0px;
+    margin:0px;
+    display:inline;
+}
+.events .default .fields .fm {
+    text-decoration:none;
+    text-indent:-5000px;
+    width:13px;
+    height:12px;
+    /* BEGIN: FF2 inline block text-indent fixes. (negative text-indent only works on block level elements) */
+    display:-moz-inline-box;
+    overflow:hidden;
+    font-size:1px;
+    vertical-align:text-top;
+    /* END: FF2 inline block text-indent fixes. */
+    vertical-align:middle;
+    display:inline-block;
+}
+.events .default .actions {
+    padding:3px;
+    opacity:.8;
+}
+.events .default:hover .actions {
+    opacity:1;
+}
+.events .default .a, .events .default .fields .v:hover, .events .default .fields .tg:hover {
+    background-color:#3f3f3f;
+    color:#fff;        
+}
+.events .default .h {
+    background-color:#F5E998;
+    color:#333;
+}
+/* END: default event decorator styles */

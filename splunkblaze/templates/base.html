@@ -11,9 +11,9 @@
     <meta name="description" content="{% block description %}{% end %}" />
     <meta name="keywords" content="{% block keywords %}{% end %}" />
     <title>blaze&gt;{% block title %}{% end %}</title>
-    <link rel="stylesheet" href="{{ static_url("css/base.css") }}" type="text/css" />
     <style type="text/css">
     {% apply cssmin %}
+        {% include "base.css" %}
         {% block css %}{% end %}
     {% end %}
     </style>
