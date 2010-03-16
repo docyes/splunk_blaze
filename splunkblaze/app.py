@@ -64,7 +64,14 @@ class BaseHandler(tornado.web.RequestHandler):
         return self.application.xslt_transform
     
     def render_string(self, template_name, **kwargs):
-        return tornado.web.RequestHandler.render_string(self, template_name, cssmin=cssmin.cssmin, contextual_class_name=web.contextual_class_name(self), encode_uri_component=escape.encode_uri_component, jsmin=jsmin.jsmin, **kwargs)
+        args = dict(
+             cssmin=cssmin.cssmin,
+             contextual_class_name=web.contextual_class_name(self),
+             encode_uri_component=escape.encode_uri_component,
+             jsmin=jsmin.jsmin
+        )
+        args.update(kwargs)
+        return tornado.web.RequestHandler.render_string(self, template_name, **args)
 
 class HomeHandler(BaseHandler):
     def get(self):
