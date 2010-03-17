@@ -1,8 +1,19 @@
 #!/usr/bin/env python
+import functools
 
 def contextual_class_name(obj):
     """Takes an object reference and derives a css class name. Used primarily for deriving a contextual css selector per handler."""
     return obj.__class__.__name__.lower().replace("handler", "")
+
+def cache(method):
+    """Simple decorator to cache the results of a method. NOTE!!! Does not memoize based on *args and **kwargs."""
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        print method
+        if not self.application.cache.has_key(method):
+            self.application.cache[method] = method(self, *args, **kwargs)
+        return self.application.cache[method]
+    return wrapper
 
 class BufferedWriter(object):
     """Convenience object to write and maintain ordering of rendered strings. Useful when dealing with multiple async requests and buffering responses."""

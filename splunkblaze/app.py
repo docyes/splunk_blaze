@@ -55,6 +55,7 @@ class Application(tornado.web.Application):
             ui_modules=uimodules,
             xsrf_cookies=True,
         )
+        self.cache = {}
         self.xslt_transform = et.XSLT(et.parse(os.path.join(settings["template_path"], "modules", "raw.xslt")))
         tornado.web.Application.__init__(self, handlers, **settings)
         
@@ -75,7 +76,11 @@ class BaseHandler(tornado.web.RequestHandler):
 
 class HomeHandler(BaseHandler):
     def get(self):
-        self.render("home/index.html", enable_clear_button=options.enable_clear_button, enable_search_loader=options.enable_search_loader, search_browser_cache_ttl=options.search_browser_cache_ttl)
+        self.finish(self._render_string())
+        
+    @web.cache
+    def _render_string(self):
+         return self.render_string("home/index.html", enable_clear_button=options.enable_clear_button, enable_search_loader=options.enable_search_loader, search_browser_cache_ttl=options.search_browser_cache_ttl)
 
 class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
     @tornado.web.asynchronous
@@ -108,6 +113,6 @@ def main():
     http_server = tornado.httpserver.HTTPServer(Application())
     http_server.listen(options.port)
     tornado.ioloop.IOLoop.instance().start()
- 
+
 if __name__ == "__main__":
     main()
