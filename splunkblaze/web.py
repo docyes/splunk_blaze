@@ -9,7 +9,6 @@ def cache(method):
     """Simple decorator to cache the results of a method. NOTE!!! Does not memoize based on *args and **kwargs."""
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
-        print method
         if not self.application.cache.has_key(method):
             self.application.cache[method] = method(self, *args, **kwargs)
         return self.application.cache[method]

@@ -95,17 +95,16 @@ class SyncSearchHandler(BaseHandler, auth.SplunkMixin):
                            search=sync_search, spawn_process=sync_spawn_process, segmentation=options.splunk_search_segmentation)
 
     def _on_create(self, response, xml=None, **kwargs):
+        error = None
+        results = None
         if response.error:
             if xml is not None:
                 error = xml.findtext("messages/msg")
             else:
                 error = response.error
-            data = self.render_string("search/_error.html", error=error, search=self.get_argument("search"))
         elif xml is not None:
-            data = self.render_string("search/_results.html", xml_doc=xml, search=self.get_argument("search"), count=options.splunk_search_sync_max_count, display_event_time=options.display_event_time)
-        else:
-            data = self.render_string("search/_none.html", search=self.get_argument("search"))
-        self.finish(data)
+            results = xml.findall("result")
+        self.render("search/index.html", error=error, results=results, search=self.get_argument("search"), count=options.splunk_search_sync_max_count, display_event_time=options.display_event_time, sid=None)
 
 def main():
     tornado.options.parse_command_line()
