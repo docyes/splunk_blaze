@@ -1,0 +1,43 @@
+.search {
+    padding-top:12px;
+}
+.search h2 {
+    display:block;
+    font-size:12px;
+    font-weight:bold;
+}
+.search p {
+    margin:0px;
+    padding:0px;
+}
+.search .summary {
+    margin:24px;
+}
+.search .summary .help {
+    float:left;
+    text-align:left;
+    width:40%;
+}
+.search .summary .help .key {
+    border:1px solid #3f3f3f;
+    font-family:serif;
+}
+.search .summary .help .enter {
+    border:1px solid #3f3f3f;
+    padding:2px 2px 0px 2px;
+}
+.search .summary .help .select {
+    padding-top:2px;
+    background:#B3D9FF;
+}
+.search .summary .results {
+    float:left;
+    text-align:right;
+    width:60%;
+}
+.search .summary .results h2 {
+    font-weight:normal;
+}
+.search .summary .results h2 em {
+    font-weight:bold;
+}

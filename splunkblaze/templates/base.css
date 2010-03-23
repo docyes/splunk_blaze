@@ -32,3 +32,6 @@ ul, ol {
     padding:0px;
     list-style:none;
 }
+.clear {
+    clear:both
+}

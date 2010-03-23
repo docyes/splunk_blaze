@@ -1,45 +1,39 @@
-body.{{ contextual_class_name }} {
+.home {
   text-align:center;
   padding-top:129px;
-  background:url({{ static_url("img/smoke.png") }}) no-repeat 0px 0px;
+  /*background:url({{ static_url("img/smoke.png") }}) no-repeat 0px 0px;*/
 }
-body.{{ contextual_class_name }} form {
+.home form {
     padding-right:140px;
     padding-left:140px;
     position:relative;
 }
-body.{{ contextual_class_name }} .s {
+.home .s {
     font-family:Consolas,Monaco,Courier New,monospace;
     color:#333333;
     font-size:15px;
     width:100%; /* 100 messes up ie */
 }
-body.{{ contextual_class_name }} .f a {
+.home .f a {
     color:#CCC;
     text-decoration:none;
 }
-body.{{ contextual_class_name }} #clear {
+.home #clear {
     position:absolute;
     bottom:5px;
     right:139px;
     display:none;
 }
-body.{{ contextual_class_name }} .webkit #clear {
+.home .webkit #clear {
     bottom:6px;
 }
-body.{{ contextual_class_name }} #loader { 
+.home #loader { 
     position:absolute;
     width:16px;
     height:16px;
     bottom:6px;
     left:-1000px;/*hide based on left for ff as it does not maintain animated gif state.*/
     background:url({{ static_url("img/loader.gif") }});    
-}
-body.{{ contextual_class_name }} .none {
-    display:block;
-    padding-top:24px;
-    font-size:12px;
-    font-weight:bold;
 }
 /* BEGIN: default event decorator styles */
 .events {

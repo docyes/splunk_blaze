@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 import functools
-
-def contextual_class_name(obj):
-    """Takes an object reference and derives a css class name. Used primarily for deriving a contextual css selector per handler."""
-    return obj.__class__.__name__.lower().replace("handler", "")
-
+    
 def cache(method):
     """Simple decorator to cache the results of a method. NOTE!!! Does not memoize based on *args and **kwargs."""
     @functools.wraps(method)

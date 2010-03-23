@@ -2,12 +2,9 @@
 
 {% block title %}{{ _("search") }}{% end %}
 
-{% block keywords %}{{ _("search, lightweight search, keyboard search, fast search") }}{% end %}
-
-{% block description %}{{ _("A blazingly fast web search with arrow key bindings") }}{% end %}
-
 {% block css %}
     {% include "index.css" %}
+    {% include "../search/index.css" %}
 {% end %}
 
 {% block js %}
@@ -21,6 +18,6 @@
       <input type="image" src="{{ static_url("img/clear.png") }}" alt="Clear the search input and results" title="ESC works too!" id="clear" />
       <input type="text" name="s" value="" autocomplete="off" class="s" />
     </form>
-    <div id="r">&nbsp;</div>
+    <div id="r" class="search">&nbsp;</div>
     <p class="f"><a href="http://www.featureblend.com">Live to code, code to live...</a></p>
 {% end %}

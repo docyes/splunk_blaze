@@ -89,7 +89,8 @@
                 }
             }
         }
-        oneshotXHR.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        oneshotXHR.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+        //oneshotXHR.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         oneshotXHR.send("");//empty arg for FF <3.5
     }
     /**

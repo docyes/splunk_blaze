@@ -1,39 +1,47 @@
-<input type="hidden" name="q" id="q" value="{{ encode_uri_component(search) }}"/>
-{% if sid %}
-    <input type="hidden" name="sid" id="sid" value="{{ sid }}" />
+{% extends "../base.html" %}
+
+{% block css %}
+    {% include "index.css" %}
 {% end %}
-{% if error %}
-    <h2>{{ _("Blockage in cave!") }}</h2>
-    <p>{{ error }}</p>
-{% else %}
-    {% if results %}
-        <div style="margin:24px;">
-            <div style="float:left; text-align:left; width:40%;">
-                {% comment +&nbsp;<a href="">Show options...</a> %} 
-                (&nbsp;<em style="border:1px solid #3f3f3f; font-family:serif;">&#8592;</em> <em style="border:1px solid #3f3f3f; font-family:serif;">&#8593;</em> <em style="border:1px solid #3f3f3f; font-family:serif;">&#8595;</em> <em style="border:1px solid #3f3f3f; font-family:serif;">&#8594;</em> <em style="text-decoration:underline;">OR</em> sele<em style="padding-top:2px; background:#B3D9FF;">ct te</em>xt&nbsp;) + <em style="border:1px solid #3f3f3f; padding:2px 2px 0px 2px;">enter</em> = search
-            </div>
-            <div style="float:left; text-align:right; width:60%;">
-                <h2 style="color:#333; font-weight:normal; font-size:12px;">Results <em style="font-weight:bold;">1</em> - <em style="font-weight:bold;">{{ len(results) }}</em> of
-                {% if len(results)<count %}
-                    <em style="font-weight:bold;">{{ len(results) }}</em>
-                {% else %}
-                    <em style="font-weight:bold;">many</em>
-                {% end %}
-                for <em style="font-weight:bold;">{{ escape(search) }}</em>.
-                (<em style="font-weight:bold;">{{ round(request.request_time(), 3) }}</em> seconds)</h2>
-            </div>
-            <div style="clear:both;"></div>
-        </div>
-        <div class="events">
-            <ul class="events">
-            {% for result in results %}
-                <li class="default">
-                    {{ modules.Event(result, display_time=display_event_time) }}
-                </li>
-            {% end %}
-            </ul>
-        </div>
+
+{% block body %}
+    <input type="hidden" name="q" id="q" value="{{ encode_uri_component(search) }}"/>
+    {% if sid %}
+        <input type="hidden" name="sid" id="sid" value="{{ sid }}" />
+    {% end %}
+    {% if error %}
+        <h2>{{ _("Blockage in cave!") }}</h2>
+        <p>{{ error }}</p>
     {% else %}
-        <h2 class="none">{{ _("No Results Found") }}</h2>
+        {% if results %}
+            <div class="summary">
+                <div class="help">
+                    {% comment +&nbsp;<a href="">Show options...</a> %} 
+                    (&nbsp;<em class="key">&#8592;</em> <em class="key">&#8593;</em> <em class="key">&#8595;</em> <em class="key">&#8594;</em> <em style="text-decoration:underline;">OR</em> sele<em class="select">ct te</em>xt&nbsp;) + <em class="enter">enter</em> = search
+                </div>
+                <div class="results">
+                    <h2>Results <em>1</em> - <em>{{ len(results) }}</em> of
+                    {% if len(results)<count %}
+                        <em>{{ len(results) }}</em>
+                    {% else %}
+                        <em>many</em>
+                    {% end %}
+                    for <em>{{ escape(search) }}</em>.
+                    (<em>{{ round(request.request_time(), 3) }}</em> seconds)</h2>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div class="events">
+                <ul class="events">
+                {% for result in results %}
+                    <li class="default">
+                        {{ modules.Event(result, display_time=display_event_time) }}
+                    </li>
+                {% end %}
+                </ul>
+            </div>
+        {% else %}
+            <h2>{{ _("No Results Found") }}</h2>
+        {% end %}
     {% end %}
 {% end %}

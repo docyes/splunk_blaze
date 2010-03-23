@@ -1,4 +1,6 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+{% if is_xhr() %}
+{% block body %}{% end %}
+{% else %}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <meta http-equiv="content-type" content="text/html;" />
@@ -8,8 +10,8 @@
     <meta name="author" content="Dr. Yes, spam at featureblend.com" />
     <meta name="robots" content="index,follow" />
     <meta name="revisit-after" content="10 days" />
-    <meta name="description" content="{% block description %}{% end %}" />
-    <meta name="keywords" content="{% block keywords %}{% end %}" />
+    <meta name="description" content="{% block description %}{{ _("search, lightweight search, keyboard search, fast search") }}{% end %}" />
+    <meta name="keywords" content="{% block keywords %}{{ _("A blazingly fast web search with arrow key bindings") }}{% end %}" />
     <title>blaze&gt;{% block title %}{% end %}</title>
     <style type="text/css">
     {% apply cssmin %}
@@ -18,7 +20,7 @@
     {% end %}
     </style>
 </head>
-<body class="{{ contextual_class_name }}">
+<body class="{{ handler_name }}">
 {% block body %}{% end %}
 <script type="text/javascript">
 {% apply jsmin %}
@@ -28,3 +30,4 @@
 </script>
 </body>
 </html>
+{% end %}

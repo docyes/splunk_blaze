@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os.path
 import datetime
+import hashlib
 import logging
 import lxml.etree as et
 import tornado.httpserver
@@ -60,19 +61,32 @@ class Application(tornado.web.Application):
         tornado.web.Application.__init__(self, handlers, **settings)
         
 class BaseHandler(tornado.web.RequestHandler):
-    @property
-    def xslt_transform(self):
-        return self.application.xslt_transform
-    
+    def digest(self, string):
+        hash = hashlib.md5()
+        hash.update(string)
+        return hash.hexdigest()
+
+    def handler_name(self, obj):
+        return obj.__class__.__name__.lower().replace("handler", "")
+
+    def is_xhr(self):
+        return True if self.request.headers.get("X-Requested-With")=="XMLHttpRequest" else False
+
     def render_string(self, template_name, **kwargs):
         args = dict(
              cssmin=cssmin.cssmin,
-             contextual_class_name=web.contextual_class_name(self),
+             digest=self.digest,
+             handler_name=self.handler_name(self),
              encode_uri_component=escape.encode_uri_component,
+             is_xhr=self.is_xhr,
              jsmin=jsmin.jsmin
         )
         args.update(kwargs)
         return tornado.web.RequestHandler.render_string(self, template_name, **args)
+    
+    @property
+    def xslt_transform(self):
+        return self.application.xslt_transform
 
 class HomeHandler(BaseHandler):
     def get(self):
