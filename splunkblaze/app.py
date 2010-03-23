@@ -42,8 +42,8 @@ define("enable_clear_button", default=False, help="control the display of the cl
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
-            (r"/", HomeHandler),
-            (r"/search/new", SyncSearchHandler),
+            tornado.web.url(r"/", HomeHandler),
+            tornado.web.url(r"/search/new", SyncSearchHandler, name="search"),
         ]
         settings = dict(
             cookie_secret="e220cf903f537500f6cfcaccd64df14d",

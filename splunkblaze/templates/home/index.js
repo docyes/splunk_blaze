@@ -55,7 +55,7 @@
         }
         toggleLoader(true);
         oneshotXHR = new XMLHttpRequest();
-        oneshotXHR.open("GET", "/search/new?"+oneshotInputSearch(), true);
+        oneshotXHR.open("GET", "{{ reverse_url("search") }}?"+oneshotInputSearch(), true);
         var xhrTimeout = setTimeout(function(){
             oneshotXHR.onreadystatechange = function(){};
             oneshotXHR.abort();
