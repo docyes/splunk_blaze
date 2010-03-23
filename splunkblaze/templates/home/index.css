@@ -1,7 +1,7 @@
 .home {
   text-align:center;
   padding-top:129px;
-  /*background:url({{ static_url("img/smoke.png") }}) no-repeat 0px 0px;*/
+  background:url({{ static_url("img/smoke.png") }}) no-repeat 0px 0px;
 }
 .home form {
     padding-right:140px;
