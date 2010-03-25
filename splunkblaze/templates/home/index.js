@@ -57,9 +57,7 @@
         oneshotXHR = new XMLHttpRequest();
         oneshotXHR.open("GET", "{{ reverse_url("search") }}?"+oneshotInputSearch(), true);
         var xhrTimeout = setTimeout(function(){
-            oneshotXHR.onreadystatechange = function(){};
-            oneshotXHR.abort();
-            oneshotXHR = null;
+            abortOneshotXHR();
             if(oneshotQueue){
                 oneshotQueue = false;
                 oneshot();
@@ -92,6 +90,16 @@
         oneshotXHR.setRequestHeader("X-Requested-With", "XMLHttpRequest");
         //oneshotXHR.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         oneshotXHR.send("");//empty arg for FF <3.5
+    }
+    /**
+     * Utility wrapper for safely aborting the oneshotXHR object (XMLHttpRequest object). Note this method will null the original xhr object reference.
+     */
+    function abortOneshotXHR(){
+        if(oneshotXHR){
+            oneshotXHR.onreadystatechange = function(){};
+            oneshotXHR.abort();
+            oneshotXHR = null;
+        }
     }
     /**
      * Generates a oneshot optimized search string based on the current state of the input element. Includes intelligent cache buster.
@@ -266,6 +274,7 @@
             if(keyCode==keyCodeBindings.clear){
                 clearAll();
             }else if(blaze.base.trimString(input.value).length==0){
+                abortOneshotXHR();
                 setHash("");
                 toggleClearButton(false);
                 clearResultsDOM();
@@ -285,6 +294,7 @@
      * Clear the results DOM and the input and hide the clear button.
      */
     function clearAll(){
+         abortOneshotXHR();
          input.value = "";
          setHash("");
          clearResultsDOM();
