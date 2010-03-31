@@ -149,13 +149,16 @@ blaze.base = {
              * @param {String} uri TBD.
              * @param {Function} callback TBD.
              * @param {Number} timeoutTime TBD.
+             * @param {Object} options TBD.
              */
-            self.request = function(method, uri, callback, timeoutTime){
+            self.request = function(method, uri, callback, timeoutTime, options){
                 _id++;
                 if(_xhr){
                     callback({type:"block", id:_id});
                     return;
                 }
+                var body = "";
+                options = options || {};
                 _callback = callback;        
                 _callback({type:"request", id:_id});
                 _xhr = new blaze.base.xhr.XMLHttpRequest();
@@ -164,12 +167,16 @@ blaze.base = {
                 _xhr.onreadystatechange = _onReadyStateChange;
                 if(method=="POST"){
                     _xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");    
+                    body = "_xsrf="+encodeURIComponent(blaze.base.xsrfExtract());
+                    if(options.body){
+                        body += "&"+options.body; 
+                    }               
                 }
                 if(_timeoutId){
                     clearTimeout(_timeoutId);
                 }
                 _timeoutId = setTimeout(_onTimeout, timeoutTime);
-                _xhr.send("");//ff<3.5
+                _xhr.send(body);//ff<3.5 always requires string even empty.
             };
             self.abort = function(){
                 if(_timeoutId){

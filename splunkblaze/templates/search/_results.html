@@ -1,0 +1,26 @@
+<div class="summary">
+    <div class="help">
+        {% comment +&nbsp;<a href="">Show options...</a> %} 
+        (&nbsp;<em class="key">&#8592;</em> <em class="key">&#8593;</em> <em class="key">&#8595;</em> <em class="key">&#8594;</em> <em style="text-decoration:underline;">OR</em> sele<em class="select">ct te</em>xt&nbsp;) + <em class="enter">enter</em> = search
+    </div>
+    <div class="results">
+        <h2>Results <em>1</em> - <em>{{ len(results) }}</em> of
+        {% if len(results)<count %}
+            <em>{{ len(results) }}</em>
+        {% else %}
+            <em>many</em>
+        {% end %}
+        for <em>{{ escape(search) }}</em>.
+        (<em>{{ round(request.request_time(), 3) }}</em> seconds)</h2>
+    </div>
+    <div class="clear"></div>
+</div>
+<div class="events">
+    <ul class="events">
+    {% for result in results %}
+        <li class="default">
+            {{ modules.Event(result, display_time=display_event_time) }}
+        </li>
+    {% end %}
+    </ul>
+</div>

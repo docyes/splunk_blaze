@@ -266,6 +266,7 @@
                 oneshotXHR.abort();
                 setHash("q=");
                 toggleClearButton(false);
+                gc();
                 clearResultsDOM();
             }else{
                 toggleClearButton(true);
@@ -286,6 +287,7 @@
          oneshotXHR.abort();
          input.value = "";
          setHash("q=");
+         gc();
          clearResultsDOM();
          toggleClearButton(false);
     }
@@ -315,10 +317,8 @@
      */
     function gc(){
         if(document.getElementById("sid")){
-            var inputValue = input.value;
-            input.value = "|";
-            oneshotRequest();
-            input.value = inputValue;
+            var body = "sid="+document.getElementById("sid").value+"&action=cancel";
+            oneshotXHR.request("POST", "{{ reverse_url("control") }}", function(){}, oneshotTimeout, {body:body});
         }
     }
     /**
