@@ -132,5 +132,87 @@ blaze.base = {
         targetClone.innerHTML = innerHTML;
         target.parentNode.replaceChild(targetClone, target);
         return targetClone;
+    },
+    xhr: {
+        /**
+         * Single channel XHR wrapper.
+         */
+        SingleChannel: function(){
+            var self = this;
+            var _xhr = null;
+            var _timeoutId = null;
+            var _callback = null;
+            var _id = 0;
+            /**
+             * Request method for a resource.
+             * @param {String} method TBD.
+             * @param {String} uri TBD.
+             * @param {Function} callback TBD.
+             * @param {Number} timeoutTime TBD.
+             */
+            self.request = function(method, uri, callback, timeoutTime){
+                _id++;
+                if(_xhr){
+                    callback({type:"block", id:_id});
+                    return;
+                }
+                _callback = callback;        
+                _callback({type:"request", id:_id});
+                _xhr = new blaze.base.xhr.XMLHttpRequest();
+                _xhr.open(method, uri, true);
+                _xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+                _xhr.onreadystatechange = _onReadyStateChange;
+                if(method=="POST"){
+                    _xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");    
+                }
+                if(_timeoutId){
+                    clearTimeout(_timeoutId);
+                }
+                _timeoutId = setTimeout(_onTimeout, timeoutTime);
+                _xhr.send("");//ff<3.5
+            };
+            self.abort = function(){
+                if(_timeoutId){
+                    clearTimeout(_timeoutId);
+                    _timeoutId = null;
+                }
+                if(_xhr){
+                    _xhr.onreadystatechange = function(){};
+                    _xhr.abort();
+                    _xhr = null;
+                }
+                if(_callback){
+                    _callback({type:"abort", id:_id});
+                }
+            }
+            var _onReadyStateChange = function(){
+                if(_xhr.readyState===4){
+                    clearTimeout(_timeoutId);
+                    var status = _xhr.status;
+                    var responseText = _xhr.responseText;
+                    _xhr = null;
+                    _callback({type:"response", status:status, responseText:responseText, id:_id});
+                }
+            };
+            var _onTimeout = function(){
+                _timeoutId = null;
+                self.abort();
+                _callback({type:"timeout", id:_id});
+            };
+        },
+        /**
+         * Artificial XHR life wrapper.
+         */
+        XMLHttpRequest: function(){
+            if(typeof(XMLHttpRequest)==="undefined"){
+                try{return new ActiveXObject("Msxml2.XMLHTTP.6.0");}catch(e){}
+                try{return new ActiveXObject("Msxml2.XMLHTTP.3.0");}catch(e){}
+                try{return new ActiveXObject("Msxml2.XMLHTTP");}catch(e){}
+                try{return new ActiveXObject("Microsoft.XMLHTTP");}catch(e){}
+                throw new Error("This browser does not support XMLHttpRequest.");            
+            }else{
+                return XMLHttpRequest;
+            }
+        }()
     }
 };
