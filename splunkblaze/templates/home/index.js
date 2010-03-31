@@ -2,7 +2,7 @@
     /** 
      * libsr4kids!
      */
-    var oneshotXHR = null;
+    var oneshotXHR = new blaze.base.xhr.SingleChannel();
     var d = document;
     var input = document.forms[0].elements['s'];
     var cache;
@@ -45,31 +45,34 @@
         cache = cache = (new Date()).getTime().toString(36);
     }
     /**
-     * Dispatches and updates page content based on a highly tuned oneshot search. 
-     * Single request channel throttled.
+     * Convenience wrapper for executing a search request.
      */
-    function oneshot(){
-        if(oneshotXHR){
-            oneshotQueue = true;
-            return;
-        }
-        toggleLoader(true);
-        oneshotXHR = new XMLHttpRequest();
-        oneshotXHR.open("GET", "{{ reverse_url("search") }}?"+oneshotInputSearch(), true);
-        var xhrTimeout = setTimeout(function(){
-            abortOneshotXHR();
-            if(oneshotQueue){
+    function oneshotRequest(){
+        oneshotXHR.request("GET", "{{ reverse_url("search") }}?"+oneshotInputSearch(), oneshotHandler, oneshotTimeout);
+    }
+    /**
+     * Event handler for xhr search.
+     * @param {Object} event blaze.base.xhr.SingleChannel event object.
+     */
+    function oneshotHandler(event){
+        switch(event.type){
+            case "abort":
                 oneshotQueue = false;
-                oneshot();
-            }else{
                 toggleLoader(false);
-            }
-        }, oneshotTimeout);
-        oneshotXHR.onreadystatechange = function(){
-            if(oneshotXHR.readyState===4){
-                clearTimeout(xhrTimeout);
-                if(oneshotXHR.status==200){
-                    blaze.base.turboInnerHTML(d.getElementById("r"), oneshotXHR.responseText);
+                break;
+            case "block":
+                oneshotQueue = true;
+                break
+            case "request":
+                toggleLoader(true);
+                break;
+            case "timeout":
+                oneshotRequest();
+                break;
+            case "response":
+                toggleLoader(false);
+                if(event.status==200){
+                    blaze.base.turboInnerHTML(d.getElementById("r"), event.responseText);
                     setSearchHashFromInput(document.getElementById("q"));
                     var items = getEvents();
                     if(items.length>0){
@@ -78,27 +81,13 @@
                 }else{
                     clearResultsDOM();
                 }
-                oneshotXHR = null;
                 if(oneshotQueue){
                     oneshotQueue = false;
-                    oneshot();
-                }else{
-                    toggleLoader(false);
+                    oneshotRequest();
                 }
-            }
-        }
-        oneshotXHR.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-        //oneshotXHR.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        oneshotXHR.send("");//empty arg for FF <3.5
-    }
-    /**
-     * Utility wrapper for safely aborting the oneshotXHR object (XMLHttpRequest object). Note this method will null the original xhr object reference.
-     */
-    function abortOneshotXHR(){
-        if(oneshotXHR){
-            oneshotXHR.onreadystatechange = function(){};
-            oneshotXHR.abort();
-            oneshotXHR = null;
+                break;
+            default:
+                break;
         }
     }
     /**
@@ -241,7 +230,7 @@
             }catch(err){}
             if(str.length>0){
                 input.value = input.value + freeRangeSelectFormat.replace("%s", str);
-                oneshot();
+                oneshotRequest();
                 return;
             }
             var items = getEvents();
@@ -268,19 +257,19 @@
             }
             var str = (terms[activeTermIndex].textContent)?terms[activeTermIndex].textContent:terms[activeTermIndex].innerText;
             input.value = input.value + termSelectFormat.replace("%s", str);
-            oneshot();
+            oneshotRequest();
         }
         if(keyCode!=keyCodeBindings.left && keyCode!=keyCodeBindings.right && keyCode!=keyCodeBindings.up && keyCode!=keyCodeBindings.down){
             if(keyCode==keyCodeBindings.clear){
                 clearAll();
             }else if(blaze.base.trimString(input.value).length==0){
-                abortOneshotXHR();
+                oneshotXHR.abort();
                 setHash("");
                 toggleClearButton(false);
                 clearResultsDOM();
             }else{
                 toggleClearButton(true);
-                oneshot();
+                oneshotRequest();
             }
         }
     }
@@ -294,7 +283,7 @@
      * Clear the results DOM and the input and hide the clear button.
      */
     function clearAll(){
-         abortOneshotXHR();
+         oneshotXHR.abort();
          input.value = "";
          setHash("");
          clearResultsDOM();
@@ -328,7 +317,7 @@
         if(document.getElementById("sid")){
             var inputValue = input.value;
             input.value = "|";
-            oneshot();
+            oneshotRequest();
             input.value = inputValue;
         }
     }
@@ -357,7 +346,7 @@
             var index = currentHash.indexOf("=");
             searchValue = (index>-1)?currentHash.substring(index+1):"";
             input.value = decodeURIComponent(searchValue);
-            oneshot();
+            oneshotRequest();
         }
     }
     function selectEvent(el){
