@@ -264,7 +264,7 @@
                 clearAll();
             }else if(blaze.base.trimString(input.value).length==0){
                 oneshotXHR.abort();
-                setHash("");
+                setHash("q=");
                 toggleClearButton(false);
                 clearResultsDOM();
             }else{
@@ -285,7 +285,7 @@
     function clearAll(){
          oneshotXHR.abort();
          input.value = "";
-         setHash("");
+         setHash("q=");
          clearResultsDOM();
          toggleClearButton(false);
     }
@@ -325,8 +325,8 @@
      * Shorthand for setting the window.location.hash and internal state member used for history management (back button).
      */
     function setHash(str){
-         window.location.hash = str;
-         lastHash = blaze.base.getHash();
+        window.location.hash = str;
+        lastHash = blaze.base.getHash();
     }
     /**
      * Convenience method for setting the search hash from a DOM element object.
@@ -346,7 +346,11 @@
             var index = currentHash.indexOf("=");
             searchValue = (index>-1)?currentHash.substring(index+1):"";
             input.value = decodeURIComponent(searchValue);
-            oneshotRequest();
+            if(searchValue.length>0){
+                oneshotRequest();
+            }else{
+                clearResultsDOM();
+            }
         }
     }
     function selectEvent(el){
