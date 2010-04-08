@@ -32,11 +32,11 @@ Known Issues:
 
 Future Features:
 =======
--Faster!
--Typeahead
--Bookmarking
--History
--Parallel syncronous/asyncronous search
--Real-time search
--Contextual menu
--User session based settings
+[ ] Faster!
+[ ] Typeahead
+[x] Bookmarking
+[x] History
+[50%] Parallel syncronous/asyncronous search
+[ ] Real-time search
+[ ] Contextual menu interaction with raw text
+[ ] User settings/preferences
