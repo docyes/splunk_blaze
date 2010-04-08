@@ -22,18 +22,6 @@
     };
     var termSelectFormat = ' "%s"';
     var freeRangeSelectFormat = ' "*%s*"';
-    /**
-     * Artificial XHR life.
-     */            
-    if(typeof(XMLHttpRequest)==="undefined"){
-        XMLHttpRequest = function() {
-            try{return new ActiveXObject("Msxml2.XMLHTTP.6.0");}catch(e){}
-            try{return new ActiveXObject("Msxml2.XMLHTTP.3.0");}catch(e){}
-            try{return new ActiveXObject("Msxml2.XMLHTTP");}catch(e){}
-            try{return new ActiveXObject("Microsoft.XMLHTTP");}catch(e){}
-            throw new Error("This browser does not support XMLHttpRequest.");
-        };
-    }
     document.body.className = document.body.className + " " + ((navigator.userAgent.indexOf("AppleWebKit")!=-1)?"webkit":"");
     updateCache();
     setInterval(updateCache, {{ search_browser_cache_ttl }});
@@ -48,47 +36,7 @@
      * Convenience wrapper for executing a search request.
      */
     function oneshotRequest(){
-        oneshotXHR.request("GET", "{{ reverse_url("search") }}?"+oneshotInputSearch(), oneshotHandler, oneshotTimeout);
-    }
-    /**
-     * Event handler for xhr search.
-     * @param {Object} event blaze.base.xhr.SingleChannel event object.
-     */
-    function oneshotHandler(event){
-        switch(event.type){
-            case "abort":
-                oneshotQueue = false;
-                toggleLoader(false);
-                break;
-            case "block":
-                oneshotQueue = true;
-                break
-            case "request":
-                toggleLoader(true);
-                break;
-            case "timeout":
-                oneshotRequest();
-                break;
-            case "response":
-                toggleLoader(false);
-                if(event.status==200){
-                    blaze.base.turboInnerHTML(d.getElementById("r"), event.responseText);
-                    setSearchHashFromInput(document.getElementById("q"));
-                    var items = getEvents();
-                    if(items.length>0){
-                        selectEvent(items[0]);
-                    }
-                }else{
-                    clearResultsDOM();
-                }
-                if(oneshotQueue){
-                    oneshotQueue = false;
-                    oneshotRequest();
-                }
-                break;
-            default:
-                break;
-        }
+        oneshotXHR.request("GET", "{{ reverse_url("search") }}?"+oneshotInputSearch(), dispatcher, oneshotTimeout);
     }
     /**
      * Generates a oneshot optimized search string based on the current state of the input element. Includes intelligent cache buster.
@@ -113,166 +61,234 @@
      */
     function dispatcher(evt, target){
          var type = evt.type;
-         if(type=="mousedown" && target.id=="clear"){
-             blaze.base.preventDefault(evt);
-             clearAll();
-             input.focus();
-         }else if(type=="keydown" && (navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1) || type=="keypress" && !(navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1)){
-             keyboardNavigate(evt, target);
-         }else if(type=="keyup"){
-             keyboardOneshot(evt, target);
+         switch(type){
+             case "abort":
+                 oneshotQueue = false;
+                 toggleLoader(false);
+                 break;
+             case "block":
+                 oneshotQueue = true;
+                 break
+             case "request":
+                 toggleLoader(true);
+                 break;
+             case "timeout":
+                 oneshotRequest();
+                 break;
+             case "response":
+                 toggleLoader(false);
+                 if(evt.status==200){
+                     blaze.base.turboInnerHTML(d.getElementById("r"), evt.responseText);
+                     setSearchHashFromInput(document.getElementById("q"));
+                     var items = getEvents();
+                     if(items.length>0){
+                         selectEvent(items[0]);
+                     }
+                 }else{
+                     clearResultsDOM();
+                 }
+                 if(oneshotQueue){
+                     oneshotQueue = false;
+                     oneshotRequest();
+                 }
+                 break;
+             case "mousedown":
+                 if(target.id=="clear"){
+                     blaze.base.preventDefault(evt);
+                     clearAll();
+                     input.focus()                     
+                 }
+                 break;
+             case "keydown":
+                 if(navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1){
+                     var keyCode = blaze.base.getKeyCode(evt);
+                     if(keyCode==keyCodeBindings.up || keyCode==keyCodeBindings.down){
+                         kbdYAxis(evt, target);
+                     }else if(keyCode==keyCodeBindings.left || keyCode==keyCodeBindings.right){
+                         kbdXAxis(evt, target);
+                     }
+                 }
+                 break;
+             case "keypress":
+                 if(!(navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1)){
+                     var keyCode = blaze.base.getKeyCode(evt);
+                     if(keyCode==keyCodeBindings.up || keyCode==keyCodeBindings.down){
+                         kbdYAxis(evt, target);
+                     }else if(keyCode==keyCodeBindings.left || keyCode==keyCodeBindings.right){
+                         kbdXAxis(evt, target);
+                     }
+                 }
+                 break;
+             case "keyup":
+                 var keyCode = blaze.base.getKeyCode(evt);
+                 if(keyCode==keyCodeBindings.enter){
+                     kbdUpdate(evt, target);
+                 }else if(keyCode==keyCodeBindings.clear){
+                     clearAll();
+                 }else if(keyCode!=keyCodeBindings.left && keyCode!=keyCodeBindings.right && keyCode!=keyCodeBindings.up && keyCode!=keyCodeBindings.down){
+                     kbdOneshot(evt, target);
+                 }
+                 break;
+             case "unload":
+                 gc();
+             default:
+                 break;
          }
     }
     /**
-     * Enables the ability to navigate the document using keyboard bindings.
+     * Enables the ability to navigate the document using keyboard bindings within the Y-Axis plane.
      * TODO: Push more event related switching to dispatcher.
      * @param {Object} evt DOM event reference.
      * @param {Object} target A normalized event target.             
      */
-    function keyboardNavigate(evt, target){
+    function kbdYAxis(evt, target){
         var keyCode = blaze.base.getKeyCode(evt);
-        if(keyCode==keyCodeBindings.up || keyCode==keyCodeBindings.down){
-            var items = getEvents();
-            if(items.length==0){
-                return;
-            }
-            var activeIndex = -1;
-            for(var i=0; i<items.length; i++){
-                if(items[i].active){
-                    items[i].active = false;
-                    items[i].style.background = "";
-                    activeIndex  = i;
-                    break;
-                }
-            }
-            if(activeIndex>-1){
-                resetTerms(items[activeIndex]);
-            }
-            if(keyCode==keyCodeBindings.up){
-                if(activeIndex>0){
-                    var el = items[activeIndex-1];
-                }else{
-                    var el = items[items.length-1];
-                }
-                selectEvent(el);
-            }else if(keyCode==keyCodeBindings.down){
-                if(activeIndex>-1 && activeIndex<items.length-1){
-                    var el = items[activeIndex+1];
-                }else{
-                    var el = items[0];
-                }
-                selectEvent(el);
+        var items = getEvents();
+        if(items.length==0){
+            return;
+        }
+        var activeIndex = -1;
+        for(var i=0; i<items.length; i++){
+            if(items[i].active){
+                items[i].active = false;
+                items[i].style.background = "";
+                activeIndex  = i;
+                break;
             }
         }
-        if(keyCode==keyCodeBindings.left || keyCode==keyCodeBindings.right){
-            var items = getEvents();
-            if(items.length==0){
-                return;
+        if(activeIndex>-1){
+            resetTerms(items[activeIndex]);
+        }
+        if(keyCode==keyCodeBindings.up){
+            if(activeIndex>0){
+                var el = items[activeIndex-1];
+            }else{
+                var el = items[items.length-1];
             }
-            var activeIndex = -1;
-            for(var i=0; i<items.length; i++){
-                if(items[i].active){
-                    activeIndex  = i;
-                    break;
-                }
+            selectEvent(el);
+        }else if(keyCode==keyCodeBindings.down){
+            if(activeIndex>-1 && activeIndex<items.length-1){
+                var el = items[activeIndex+1];
+            }else{
+                var el = items[0];
             }
-            if(activeIndex==-1){
-                return;
-            }
-            var terms = getTerms(items[activeIndex]);
-            var activeTermIndex = -1;
-            for(var i=0; i<terms.length; i++){
-                if(terms[i].active){
-                    terms[i].active = false;
-                    blaze.base.removeClass(terms[i], "h");
-                    activeTermIndex  = i;
-                    break;
-                }
-            }
-            if(keyCode==keyCodeBindings.left){
-                if(activeTermIndex>0){
-                    var el = terms[activeTermIndex-1];
-                    if(blaze.base.hasClass(el, "time")){//disable time selection
-                        el = terms[((activeTermIndex-2>0)?activeTermIndex-2:terms.length-1)];
-                    }
-                }else{
-                    var el = terms[terms.length-1];
-                }
-                blaze.base.addClass(el, "h");
-                el.active = true;                                                
-            }else if(keyCode==keyCodeBindings.right){
-                if(activeTermIndex>-1 && activeTermIndex<terms.length-1){
-                    var el = terms[activeTermIndex+1];
-                }else{
-                    var el = terms[0];
-                    if(blaze.base.hasClass(el, "time")){//disable time selection
-                        el = terms[1];
-                    }
-                }
-                blaze.base.addClass(el, "h");
-                el.active = true;
-            }
+            selectEvent(el);
         }
     }
     /**
-     * Keyboard oneshot search handing.
+     * Enables the ability to navigate the document using keyboard bindings within the X-Axis plane.
      * TODO: Push more event related switching to dispatcher.
      * @param {Object} evt DOM event reference.
      * @param {Object} target A normalized event target.             
-     */ 
-    function keyboardOneshot(evt, target){
+     */
+    function kbdXAxis(evt, target){
         var keyCode = blaze.base.getKeyCode(evt);
-        if(keyCode==keyCodeBindings.enter){
-            var str = "";
-            var selectObj = new blaze.base.Selection();
-            try{
-                var str = selectObj.getRangeAt(0).toString();
-            }catch(err){}
-            if(str.length>0){
-                input.value = input.value + freeRangeSelectFormat.replace("%s", str);
-                oneshotRequest();
-                return;
+        var items = getEvents();
+        if(items.length==0){
+            return;
+        }
+        var activeIndex = -1;
+        for(var i=0; i<items.length; i++){
+            if(items[i].active){
+                activeIndex  = i;
+                break;
             }
-            var items = getEvents();
-            var activeIndex = -1;
-            for(var i=0; i<items.length; i++){
-                if(items[i].active){
-                    activeIndex  = i;
-                    break;
+        }
+        if(activeIndex==-1){
+            return;
+        }
+        var terms = getTerms(items[activeIndex]);
+        var activeTermIndex = -1;
+        for(var i=0; i<terms.length; i++){
+            if(terms[i].active){
+                terms[i].active = false;
+                blaze.base.removeClass(terms[i], "h");
+                activeTermIndex  = i;
+                break;
+            }
+        }
+        if(keyCode==keyCodeBindings.left){
+            if(activeTermIndex>0){
+                var el = terms[activeTermIndex-1];
+                if(blaze.base.hasClass(el, "time")){//disable time selection
+                    el = terms[((activeTermIndex-2>0)?activeTermIndex-2:terms.length-1)];
+                }
+            }else{
+                var el = terms[terms.length-1];
+            }
+            blaze.base.addClass(el, "h");
+            el.active = true;                                                
+        }else if(keyCode==keyCodeBindings.right){
+            if(activeTermIndex>-1 && activeTermIndex<terms.length-1){
+                var el = terms[activeTermIndex+1];
+            }else{
+                var el = terms[0];
+                if(blaze.base.hasClass(el, "time")){//disable time selection
+                    el = terms[1];
                 }
             }
-            if(activeIndex==-1){
-                return;
-            }
-            var terms = getTerms(items[activeIndex]);
-            var activeTermIndex = -1;
-            for(var i=0; i<terms.length; i++){
-                if(terms[i].active){
-                    activeTermIndex  = i;
-                    break;
-                }
-            }
-            if(activeTermIndex==-1){
-                return;
-            }
-            var str = (terms[activeTermIndex].textContent)?terms[activeTermIndex].textContent:terms[activeTermIndex].innerText;
-            input.value = input.value + termSelectFormat.replace("%s", str);
+            blaze.base.addClass(el, "h");
+            el.active = true;
+        }
+    }
+    /**
+     * Keyboard oneshot search handling.
+     * @param {Object} evt DOM event reference.
+     * @param {Object} target A normalized event target.             
+     */ 
+    function kbdOneshot(evt, target){
+        if(blaze.base.trimString(input.value).length==0){
+            oneshotXHR.abort();
+            setHash("q=");
+            toggleClearButton(false);
+            gc();
+            clearResultsDOM();
+        }else{
+            toggleClearButton(true);
             oneshotRequest();
         }
-        if(keyCode!=keyCodeBindings.left && keyCode!=keyCodeBindings.right && keyCode!=keyCodeBindings.up && keyCode!=keyCodeBindings.down){
-            if(keyCode==keyCodeBindings.clear){
-                clearAll();
-            }else if(blaze.base.trimString(input.value).length==0){
-                oneshotXHR.abort();
-                setHash("q=");
-                toggleClearButton(false);
-                gc();
-                clearResultsDOM();
-            }else{
-                toggleClearButton(true);
-                oneshotRequest();
+    }
+    /**
+     * Keyboard update handler.
+     * @param {Object} evt DOM event reference.
+     * @param {Object} target A normalized event target.             
+     */
+    function kbdUpdate(evt, target){
+        var str = "";
+        var selectObj = new blaze.base.Selection();
+        try{
+            var str = selectObj.getRangeAt(0).toString();
+        }catch(err){}
+        if(str.length>0){
+            input.value = input.value + freeRangeSelectFormat.replace("%s", str);
+            oneshotRequest();
+            return;
+        }
+        var items = getEvents();
+        var activeIndex = -1;
+        for(var i=0; i<items.length; i++){
+            if(items[i].active){
+                activeIndex  = i;
+                break;
             }
         }
+        if(activeIndex==-1){
+            return;
+        }
+        var terms = getTerms(items[activeIndex]);
+        var activeTermIndex = -1;
+        for(var i=0; i<terms.length; i++){
+            if(terms[i].active){
+                activeTermIndex  = i;
+                break;
+            }
+        }
+        if(activeTermIndex==-1){
+            return;
+        }
+        var str = (terms[activeTermIndex].textContent)?terms[activeTermIndex].textContent:terms[activeTermIndex].innerText;
+        input.value = input.value + termSelectFormat.replace("%s", str);
+        oneshotRequest();
     }
     /**
      * Clear the results DOM.
@@ -384,5 +400,5 @@
     blaze.base.ezEventListener(document, "keydown", dispatcher);
     blaze.base.ezEventListener(document, "keypress", dispatcher);
     blaze.base.ezEventListener(document, "keyup", dispatcher);
-    blaze.base.ezEventListener(window, "unload", gc);
+    blaze.base.ezEventListener(window, "unload", dispatcher);
 })();
