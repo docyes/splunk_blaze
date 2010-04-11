@@ -3,6 +3,7 @@ splunk> blaze
 Overview:
 =======
 A blazingly fast frontend with arrow key bindings using the Facebook http://www.tornadoweb.org web framework and http://www.splunk.com search engine.
+No third party JavaScript library dependencies.
 
 Put this in your pipe and smoke it!
 
