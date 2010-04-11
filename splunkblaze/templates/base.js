@@ -39,6 +39,24 @@ blaze.base = {
          }
     },
     /**
+     * Get the cumulative offsetTop for an element.
+     *
+     * @param {Object} element A DOM element.
+     */
+    cumlativeOffsetTop: function(element){
+        if(!element) return 0;
+        return element.offsetTop + this.cumlativeOffsetTop(element.offsetParent);
+    },
+    /**
+     * Get the cumulative offsetLeft for an element.
+     *
+     * @param {Object} element A DOM element.
+     */
+    cumlativeOffsetLeft: function(element){
+        if(!element) return 0;
+        return element.offsetLeft + this.cumlativeOffsetLeft(element.offsetParent);
+    },
+    /**
      * Key code normalizer.
      * @param {Object} evt A DOM event.
      * @return {Number}

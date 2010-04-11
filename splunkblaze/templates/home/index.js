@@ -287,6 +287,16 @@
             return;
         }
         var str = (terms[activeTermIndex].textContent)?terms[activeTermIndex].textContent:terms[activeTermIndex].innerText;
+        /**
+        WORK IN PROGRESS
+        var contextNav = d.getElementById("r").getElementsByClassName("context-nav")[0];
+        contextNavStyle = contextNav.style;
+        contextNavStyle.top = (blaze.base.cumlativeOffsetTop(terms[activeTermIndex]) + terms[activeTermIndex].offsetHeight) + "px"
+        contextNavStyle.left = blaze.base.cumlativeOffsetLeft(terms[activeTermIndex]) + "px"
+        contextNavStyle.display = "block";
+        console.log(contextNav.getElementsByTagName("a")[0])
+        blaze.base.addClass(contextNav.getElementsByTagName("a")[0], "h");
+        */
         input.value = input.value + termSelectFormat.replace("%s", str);
         oneshotRequest();
     }
