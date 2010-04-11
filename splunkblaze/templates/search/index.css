@@ -41,3 +41,31 @@
 .search .summary .results h2 em {
     font-weight:bold;
 }
+.search .context-nav {
+    display:none;
+    position:absolute;
+    z-index:2;
+    left:331px;
+    top:286px;
+    background:#FFF;
+    opacity:.8;
+    text-align:left;
+    border:1px solid #3F3F3F;
+    border-bottom:none;
+}
+.search .context-nav li {
+    border-bottom:1px dotted #3F3F3F;
+}
+.search .context-nav li:last-child {
+    border-bottom:1px solid;
+}
+.search .context-nav li a {
+    text-decoration:none;
+    padding:3px 14px 0px 14px;
+    display:block;
+    color:#3F3F3F;    
+}
+.search .context-nav li a:hover {
+    background-color:#F5E998;
+}
+
