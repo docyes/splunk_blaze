@@ -100,7 +100,7 @@
                  }
                  break;
              case "keydown":
-                 if(navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1){
+                 if(blaze.base.isSafari){
                      var keyCode = blaze.base.getKeyCode(evt);
                      if(keyCode==keyCodeBindings.up || keyCode==keyCodeBindings.down){
                          kbdYAxis(evt, target);
@@ -110,7 +110,7 @@
                  }
                  break;
              case "keypress":
-                 if(!(navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1)){
+                 if(!blaze.base.isSafari){
                      var keyCode = blaze.base.getKeyCode(evt);
                      if(keyCode==keyCodeBindings.up || keyCode==keyCodeBindings.down){
                          kbdYAxis(evt, target);

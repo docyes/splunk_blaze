@@ -1,5 +1,6 @@
 blaze = window.blaze || {};
 blaze.base = {
+    isSafari: (navigator.appVersion && navigator.appVersion.indexOf("Safari")!=-1),
     /**
      * DOM preventDefault normalizer.
      *
