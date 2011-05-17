@@ -21,6 +21,7 @@ from tornado.options import define, options
 #app options
 define("port", default=8888, help="web server port", type=int)
 define("debug", default=False, help="web server debug mode", type=bool)
+define("static_url_prefix", default="/static", help="url prefix for static assets")
 #splunkd options
 define("splunk_host_path", default="http://localhost:8089", help="server scheme://host:port (http is faster than https)")
 define("splunk_username", default="admin", help="username")
@@ -60,6 +61,7 @@ class Application(tornado.web.Application):
             splunk_password=options.splunk_password,
             splunk_username=options.splunk_username,
             static_path=os.path.join(os.path.dirname(__file__), "static"),
+            static_url_prefix=options.static_url_prefix,
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             ui_modules=uimodules,
             xsrf_cookies=True,
